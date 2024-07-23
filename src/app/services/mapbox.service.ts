@@ -39,31 +39,6 @@ export class MapboxService {
       );
   }
 
-  // getAdresseFromCoords(lat: number, lng: number) {
-  //   const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${this.mapboxToken}`;
-
-  //   this.http.get(url).subscribe({
-  //     next: (response: any) => {
-  //       const adresse = response.features[0]?.place_name;
-  //       return adresse; // Utilisez l'adresse comme nécessaire
-  //     },
-  //     error: (error) => {
-  //       console.error("Erreur lors de la récupération de l'adresse", error);
-  //     },
-  //   });
-  // }
-  // getAdresseFromCoords(lat: number, lng: number) {
-  //   const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/`;
-
-  //   this.http.get(
-  //     url +
-  //       lng +
-  //       ',' +
-  //       lat +
-  //       '.json?types=address&access_token=' +
-  //       environment.mapbox.accessToken
-  //   );
-  // }
   getAdresseFromCoords(lat: number, lng: number): Observable<any> {
     const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?types=address&access_token=${environment.mapbox.accessToken}`;
     return this.http.get(url).pipe(
