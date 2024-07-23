@@ -1,0 +1,30 @@
+<div class="header">
+  <ion-title class="title">welcome back</ion-title>
+  <p class="subTitle">sign in to access your account</p>
+</div>
+<form>
+  <div class="ion-padding">
+    <ion-item>
+      <ion-input placeholder="username" class="input"></ion-input>
+      <ion-icon name="person-outline"></ion-icon>
+    </ion-item>
+
+    <ion-item>
+      <ion-input class="input" placeholder="password"></ion-input>
+      <ion-icon name="lock-closed-outline"> </ion-icon>
+    </ion-item>
+    <div class="forgotPassword">
+      <a routerLink="/auth/password-reset" style="color: #ffc33f"
+        >forgot password?
+      </a>
+    </div>
+  </div>
+
+  <div class="signupLink">
+    <p>
+      New member?<a routerLink="/auth/signup" style="color: #ffc33f"
+        >sign-up now</a
+      >
+    </p>
+  </div>
+</form>

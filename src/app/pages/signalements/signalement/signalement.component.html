@@ -1,0 +1,42 @@
+<ion-content>
+  <ion-card style="padding-top: 3.5rem; position: relative">
+    <ion-button
+      routerLink="../"
+      routerLinkActive="router-link-active"
+      style="
+        width: 70px;
+        height: 40px;
+        position: absolute;
+        top: 4rem;
+        left: 0.5rem;
+        z-index: 999;
+      "
+      >back</ion-button
+    >
+    <swiper-container [loop]="true" [pagination]="true">
+      @for(image of signalement?.images; track image) {
+      <swiper-slide>
+        <img
+          [alt]="signalement?.title"
+          [src]="image"
+          style="height: 100%; width: 100%; object-fit: contain"
+        />
+      </swiper-slide>
+      }
+    </swiper-container>
+    <ion-card-header>
+      <ion-card-title>{{ signalement?.title }}</ion-card-title>
+      <ion-card-subtitle>{{ signalement?.date }}</ion-card-subtitle>
+    </ion-card-header>
+
+    <ion-card-content>
+      <p>{{ signalement?.content }}</p>
+      <p>Lieu : {{ signalement?.location }}</p>
+      <p>Catégorie : {{ signalement?.category }}</p>
+      <p>Confirmations : {{ signalement?.confirmations }}</p>
+      @if(signalement?.resolutionComment) {
+      <p>Commentaire de résolution : {{ signalement?.resolutionComment }}</p>
+      }
+    </ion-card-content>
+  </ion-card>
+</ion-content>

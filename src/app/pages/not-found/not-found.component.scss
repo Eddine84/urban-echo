@@ -1,0 +1,29 @@
+.full-page {
+  min-height: 100vh;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+img {
+  max-width: 600px;
+  display: block;
+  margin-bottom: 2rem;
+}
+
+h1 {
+  margin-bottom: 0.5rem;
+}
+
+p {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  color: #5b5d60;
+}
+
+a {
+  color: #e86060;
+  text-decoration: underline;
+  text-transform: capitalize;
+}

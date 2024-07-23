@@ -1,0 +1,28 @@
+<div class="header">
+  <ion-title class="title">Welcome</ion-title>
+  <p class="subTitle">sign up to access your account</p>
+</div>
+<form>
+  <div class="ion-padding">
+    <ion-item>
+      <ion-input placeholder="name" class="input"></ion-input>
+      <ion-icon name="person-outline"></ion-icon>
+    </ion-item>
+
+    <ion-item>
+      <ion-input placeholder="email" class="input"></ion-input>
+      <ion-icon name="person-outline"> </ion-icon>
+    </ion-item>
+    <ion-item>
+      <ion-input placeholder="password" class="input"></ion-input>
+      <ion-icon name="lock-closed-outline"></ion-icon>
+    </ion-item>
+  </div>
+  <div class="signinLink">
+    <p>
+      already member?<a style="color: #ffc33f" [routerLink]="['/auth/login']"
+        >signin now</a
+      >
+    </p>
+  </div>
+</form>

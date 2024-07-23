@@ -1,3 +1,24 @@
 <ion-app>
-  <ion-router-outlet></ion-router-outlet>
+  <ion-content [fullscreen]="true">
+    <ion-router-outlet></ion-router-outlet>
+    <ion-tabs>
+      <ion-tab-bar slot="bottom">
+        <ion-tab-button routerLink="/auth" routerLinkActive="active-tab">
+          <ion-icon name="person-outline"></ion-icon>
+          profile
+        </ion-tab-button>
+        <ion-tab-button routerLink="/signaler" routerLinkActive="active-tab">
+          <ion-icon name="add-outline"></ion-icon>
+          signaler
+        </ion-tab-button>
+        <ion-tab-button
+          routerLink="/signalements"
+          routerLinkActive="active-tab"
+        >
+          <ion-icon name="list-outline"> </ion-icon>
+          signalements
+        </ion-tab-button>
+      </ion-tab-bar>
+    </ion-tabs>
+  </ion-content>
 </ion-app>

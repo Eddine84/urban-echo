@@ -1,0 +1,11 @@
+<ion-item (click)="onSelectSignalement()" [class.active]="selected()">
+  <!-- <ion-item [routerLink]="['/']"> -->
+  <ion-thumbnail slot="start">
+    <img [src]="signalement().images[0]" [alt]="signalement().title" />
+  </ion-thumbnail>
+  <ion-label>
+    <h3>{{ signalement().title }}</h3>
+    <p>{{ signalement().location }}</p>
+    <p>{{ signalement().date }} |{{ signalement().status }}</p>
+  </ion-label>
+</ion-item>
