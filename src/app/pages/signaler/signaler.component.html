@@ -18,21 +18,6 @@
       <ion-label position="floating">Contenu</ion-label>
       <ion-textarea name="content" [(ngModel)]="content"></ion-textarea>
     </ion-item>
-    <!-- <ion-item style="position: relative">
-      <ion-label position="floating">Adresse</ion-label>
-      <ion-input name="addresse" [(ngModel)]="addresse"></ion-input>
-      <ion-button
-        class="location-btn"
-        color="primary-contrast"
-        (click)="getCurrentLocation()"
-      >
-        <ion-icon
-          color="primary"
-          slot="icon-only"
-          name="locate-outline"
-        ></ion-icon>
-      </ion-button>
-    </ion-item> -->
 
     <ion-grid>
       <ion-row>
@@ -113,7 +98,7 @@
           title="Destinataires"
           [items]="categories"
           [selectedItems]="selectedDestinataires"
-          (selectionChange)="fruitSelectionChanged($event)"
+          (selectionChange)="DestinatairesSelectionChanged($event)"
           (selectionCancel)="modal.dismiss()"
         ></app-typehead>
       </ng-template>

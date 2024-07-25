@@ -12,6 +12,7 @@ import {
 } from '@ionic/angular/standalone';
 import { type Signalemenent } from '../../signalement.model';
 import { RouterLink } from '@angular/router';
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'app-signalement-small',
@@ -29,6 +30,7 @@ import { RouterLink } from '@angular/router';
     IonList,
     IonThumbnail,
     RouterLink,
+    DatePipe,
   ],
 })
 export class SignalementSmallComponent {

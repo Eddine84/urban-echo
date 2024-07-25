@@ -3,7 +3,7 @@ export const signalements = [
     id: '1',
     title: 'Nid de poule dangereux',
     location: 'Rue de la Confédération, Genève',
-    date: '15/07/2024 10:30',
+    date: '2025-12-31',
     status: 'En cours',
     images: [
       'https://picsum.photos/200/300?random=1',
@@ -25,7 +25,7 @@ export const signalements = [
     id: '2',
     title: 'Lampadaire cassé',
     location: 'Avenue de la Paix, Genève',
-    date: '14/07/2024 18:45',
+    date: '2025-12-31',
     status: 'Résolu',
     images: [
       'https://picsum.photos/200/300?random=4',
@@ -46,7 +46,7 @@ export const signalements = [
     id: '3',
     title: "Fuite d'eau",
     location: 'Boulevard du Théâtre, Genève',
-    date: '13/07/2024 12:15',
+    date: '2025-12-31',
     status: 'En cours',
     images: ['https://picsum.photos/200/300?random=6'],
     content:
@@ -64,7 +64,7 @@ export const signalements = [
     id: '4',
     title: 'Graffiti sur mur',
     location: 'Rue de Carouge, Genève',
-    date: '12/07/2024 09:00',
+    date: '2025-12-31',
     status: 'Résolu',
     images: [
       'https://picsum.photos/200/300?random=7',
@@ -88,7 +88,7 @@ export const signalements = [
     id: '5',
     title: 'Arbre tombé',
     location: 'Parc des Bastions, Genève',
-    date: '11/07/2024 14:30',
+    date: '2025-12-31',
     status: 'En cours',
     images: [
       'https://picsum.photos/200/300?random=11',
@@ -108,7 +108,7 @@ export const signalements = [
     id: '6',
     title: 'Voiture abandonnée',
     location: 'Rue du Mont-Blanc, Genève',
-    date: '10/07/2024 16:45',
+    date: '2025-12-31',
     status: 'En cours',
     images: [
       'https://picsum.photos/200/300?random=13',
@@ -130,7 +130,7 @@ export const signalements = [
     id: '7',
     title: 'Déchets encombrants',
     location: 'Rue de Lausanne, Genève',
-    date: '09/07/2024 18:20',
+    date: '2025-12-31',
     status: 'Résolu',
     images: ['https://picsum.photos/200/300?random=16'],
     content:
@@ -149,7 +149,7 @@ export const signalements = [
     id: '8',
     title: 'Feu de signalisation défectueux',
     location: 'Place du Molard, Genève',
-    date: '08/07/2024 07:30',
+    date: '2025-12-31',
     status: 'En cours',
     images: [
       'https://picsum.photos/200/300?random=17',
@@ -170,7 +170,7 @@ export const signalements = [
     id: '9',
     title: 'Panneau de signalisation manquant',
     location: 'Rue du Rhône, Genève',
-    date: '07/07/2024 10:00',
+    date: '2025-12-31',
     status: 'Résolu',
     images: [
       'https://picsum.photos/200/300?random=19',
@@ -192,7 +192,7 @@ export const signalements = [
     id: '10',
     title: 'Trottoir endommagé',
     location: "Rue de l'Hôtel-de-Ville, Genève",
-    date: '06/07/2024 11:45',
+    date: '2025-12-31',
     status: 'En cours',
     images: [
       'https://picsum.photos/200/300?random=22',
@@ -216,7 +216,7 @@ export const signalements = [
     id: '11',
     title: "Comportement raciste d'un vendeur",
     location: 'Migros Balexert, Genève',
-    date: '16/07/2024 14:15',
+    date: '2025-12-31',
     status: 'En cours',
     images: [],
     content:

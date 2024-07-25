@@ -1,7 +1,8 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { SignalementLargeComponent } from './signalement-large/signalement-large.component';
 import { SignalementSmallComponent } from './signalement-small/signalement-small.component';
-import { signalements } from '../dummy-signalements';
+
+import { SignalementsService } from 'src/app/services/signalements.service';
 
 import {
   IonHeader,
@@ -35,18 +36,22 @@ import {
   ],
 })
 export class ListeComponent implements OnInit {
-  signalements = signalements;
+  signalementsService = inject(SignalementsService);
+  signalements = this.signalementsService.getSignalements();
 
   selectedSignalementId = signal<string>('1');
+  // selectedSignalementId = '1';
 
   get selectedSignalement() {
-    return this.signalements.find(
-      (signalement) => signalement.id === this.selectedSignalementId()
+    return this.signalementsService.getSelectedSignalement(
+      this.selectedSignalementId()
     )!;
   }
 
   onSelect(id: string) {
     this.selectedSignalementId.set(id);
+    // this.selectedSignalementId = id;
+    // console.log(this.selectedSignalementId);
   }
 
   ngOnInit() {}

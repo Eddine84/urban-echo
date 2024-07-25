@@ -1,7 +1,8 @@
-import { Component, OnInit, input, Input } from '@angular/core';
+import { Component, OnInit, input, Input, inject } from '@angular/core';
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
-import { Signalemenent } from '../signalement.model';
+import { type Signalemenent } from '../signalement.model';
 import { RouterLink } from '@angular/router';
+
 import {
   IonAccordionGroup,
   IonAccordion,
@@ -13,8 +14,8 @@ import {
   IonCard,
   IonCardSubtitle,
 } from '@ionic/angular/standalone';
-import { signalements } from '../dummy-signalements';
-
+import { SignalementsService } from 'src/app/services/signalements.service';
+import { CommonModule, DatePipe } from '@angular/common';
 @Component({
   selector: 'app-signalement',
   templateUrl: './signalement.component.html',
@@ -31,19 +32,23 @@ import { signalements } from '../dummy-signalements';
     IonAccordion,
     IonAccordionGroup,
     RouterLink,
+    DatePipe,
+    CommonModule,
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class SignalementComponent implements OnInit {
+  signalementsService = inject(SignalementsService);
   selectedSignalementId = input<string>();
-  constructor() {}
+
   @Input() signalement?: Signalemenent;
-  signalements = signalements;
+  signalements = this.signalementsService.getSignalements;
 
   ngOnInit() {
-    this.signalement = signalements.find(
-      (single) => single.id === this.selectedSignalementId()
+    this.signalement = this.signalementsService.getSelectedSignalement(
+      this.selectedSignalementId()!
     );
+
     console.log(this.selectedSignalementId());
   }
 }

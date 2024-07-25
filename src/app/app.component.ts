@@ -11,6 +11,8 @@ import {
 import { RouterOutlet } from '@angular/router';
 import { addIcons } from 'ionicons';
 import { RouterLink, RouterLinkActive } from '@angular/router';
+import { FirebaseModule } from './firebase.module';
+import { CommonModule } from '@angular/common';
 import {
   addOutline,
   searchOutline,
@@ -42,6 +44,8 @@ register();
     RouterLink,
     IonRouterOutlet,
     RouterLinkActive,
+    FirebaseModule,
+    CommonModule,
   ],
 })
 export class AppComponent {

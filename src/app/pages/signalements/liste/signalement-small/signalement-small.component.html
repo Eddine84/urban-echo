@@ -6,6 +6,6 @@
   <ion-label>
     <h3>{{ signalement().title }}</h3>
     <p>{{ signalement().location }}</p>
-    <p>{{ signalement().date }} |{{ signalement().status }}</p>
+    <p>{{ signalement().date | date : "full" }} |{{ signalement().status }}</p>
   </ion-label>
 </ion-item>
