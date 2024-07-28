@@ -1,18 +1,16 @@
-import { Component, ViewChild, inject, signal } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  ViewChild,
+  inject,
+  signal,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { categories } from './dummy_categories';
 import { PhotoService } from 'src/app/services/photo.service';
 import { CommonModule } from '@angular/common';
 import { LocationService } from 'src/app/services/location.service';
-import { AngularFireStorage } from '@angular/fire/compat/storage';
-import { AngularFirestore } from '@angular/fire/compat/firestore';
-import {
-  getStorage,
-  ref,
-  uploadString,
-  getDownloadURL,
-} from 'firebase/storage';
-import { Firestore, collection, addDoc } from '@angular/fire/firestore';
+import { Router } from '@angular/router';
 
 import {
   IonInput,
@@ -91,12 +89,13 @@ export class SignalerComponent {
     addIcons({ closeCircle, camera, send, locateOutline, pin });
   }
   signalementsService = inject(SignalementsService);
-
+  router = inject(Router);
   public photoService = inject(PhotoService);
   public locationService = inject(LocationService);
   public mapboxService = inject(MapboxService);
 
   @ViewChild('modal', { static: true }) modal!: IonModal;
+  @ViewChild('form') form?: ElementRef<HTMLFormElement>;
   categories: Categorie[] = categories;
   destinatairesSelections = 'aucun';
   selectedDestinataires: string[] = [];
@@ -179,32 +178,31 @@ export class SignalerComponent {
   }
 
   async onFormSubmit() {
-    // Générer un nouvel ID unique
-    const uniqueId = `id_${new Date().getTime()}_${Math.random()
-      .toString(36)
-      .substr(2, 9)}`;
-
-    const singleSignalement = {
-      id: uniqueId,
+    const newSignalement = {
       title: this.entredTitle,
       location: this.selectedAdresse(),
       date: new Date().toISOString(),
-      status: 'En cours',
       images: this.photoService.photos
         .map((photo) => photo.webviewPath)
         .filter((path): path is string => path !== undefined), // Utilisez les URLs des photos téléchargées
       content: this.content,
       coordinates: this.signalementPosition,
       category: this.selectedType,
-      confirmations: 0,
-      resolutionComment: '',
       recipient: this.selectedDestinataires,
     };
 
-    console.log(singleSignalement);
+    console.log(newSignalement);
+    this.signalementsService.addSignalement(newSignalement);
+    this.form?.nativeElement.reset();
+    this.selectedDestinataires = [];
+    this.selectedType = '';
+    this.destinatairesSelections = 'aucun';
+    this.photoService.photos = [];
 
     // Ajouter le signalement à Firestore
     // const signalementsCollection = this.firestore.collection('signalements');
     // await signalementsCollection.add(singleSignalement);
+
+    this.router.navigate(['/signalements/liste']);
   }
 }

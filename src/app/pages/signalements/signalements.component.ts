@@ -10,7 +10,6 @@ import {
   IonContent,
   IonRouterOutlet,
 } from '@ionic/angular/standalone';
-import { Signalemenent } from './signalement.model';
 
 @Component({
   selector: 'app-signalements',
@@ -30,7 +29,5 @@ import { Signalemenent } from './signalement.model';
   ],
 })
 export class SignalementsComponent implements OnInit {
-  constructor() {}
-
   ngOnInit() {}
 }

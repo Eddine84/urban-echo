@@ -14,10 +14,10 @@
       >back</ion-button
     >
     <swiper-container [loop]="true" [pagination]="true">
-      @for(image of signalement?.images; track image) {
+      @for(image of signalement()?.images; track image) {
       <swiper-slide>
         <img
-          [alt]="signalement?.title"
+          [alt]="signalement()?.title"
           [src]="image"
           style="height: 100%; width: 100%; object-fit: contain"
         />
@@ -25,20 +25,39 @@
       }
     </swiper-container>
     <ion-card-header>
-      <ion-card-title>{{ signalement?.title }}</ion-card-title>
+      <ion-card-title>{{ signalement()?.title }}</ion-card-title>
       <ion-card-subtitle>{{
-        signalement?.date | date : "full"
+        signalement()?.date | date : "full"
       }}</ion-card-subtitle>
     </ion-card-header>
 
     <ion-card-content>
-      <p>{{ signalement?.content }}</p>
-      <p>Lieu : {{ signalement?.location }}</p>
-      <p>Catégorie : {{ signalement?.category }}</p>
-      <p>Confirmations : {{ signalement?.confirmations }}</p>
-      @if(signalement?.resolutionComment) {
-      <p>Commentaire de résolution : {{ signalement?.resolutionComment }}</p>
+      <p>{{ signalement()?.content }}</p>
+      <p>Lieu : {{ signalement()?.location }}</p>
+      <p>Catégorie : {{ signalement()?.category }}</p>
+      <p>Confirmations : {{ signalement()?.confirmations }}</p>
+      <p>statut : {{ signalement()?.status }}</p>
+      <!-- @if(signalement?.confirmations > 0){
+      <ion-icon name="checkmark-circle-outline"></ion-icon>
+      }@else {
+      <ion-icon name="checkmark-circle-outline"></ion-icon>
+      } -->
+      <ion-fab-button (click)="confirmSignalement()">
+        <ion-icon name="add"></ion-icon>
+      </ion-fab-button>
+
+      <ion-fab-button (click)="removeSignalement()">
+        <ion-icon name="trash-outline"></ion-icon>
+      </ion-fab-button>
+      @if(signalement()?.resolutionComment) {
+      <p>Commentaire de résolution : {{ signalement()?.resolutionComment }}</p>
       }
     </ion-card-content>
+    @if(signalement()?.status === 'En cours'){
+
+    <ion-button (click)="updateSignalementStatus()"
+      >Update signal status</ion-button
+    >
+    }
   </ion-card>
 </ion-content>

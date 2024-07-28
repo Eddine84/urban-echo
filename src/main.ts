@@ -12,6 +12,9 @@ import {
 } from '@ionic/angular/standalone';
 import { defineCustomElements } from '@ionic/pwa-elements/loader';
 
+import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
+import { provideAuth, getAuth } from '@angular/fire/auth';
+
 import { routes } from './app/app.routes';
 import { AppComponent } from './app/app.component';
 import { provideHttpClient } from '@angular/common/http';
@@ -28,13 +31,15 @@ bootstrapApplication(AppComponent, {
       withComponentInputBinding(),
       withPreloading(PreloadAllModules)
     ),
-    provideHttpClient(), provideServiceWorker('ngsw-worker.js', {
-            enabled: !isDevMode(),
-            registrationStrategy: 'registerWhenStable:30000'
-          }), provideServiceWorker('ngsw-worker.js', {
-            enabled: !isDevMode(),
-            registrationStrategy: 'registerWhenStable:30000'
-          }),
+    provideHttpClient(),
+    provideServiceWorker('ngsw-worker.js', {
+      enabled: !isDevMode(),
+      registrationStrategy: 'registerWhenStable:30000',
+    }),
+    provideServiceWorker('ngsw-worker.js', {
+      enabled: !isDevMode(),
+      registrationStrategy: 'registerWhenStable:30000',
+    }),
   ],
 });
 

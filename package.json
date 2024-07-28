@@ -10,7 +10,7 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "lint": "ng lint",
-    "deploy:github": "ng deploy --base-href=/urban-echo/ --repo=git@github.com:Eddine84/urban-echo.git --name=<eddine84> --email=<eddine.fersadou@gmail.com> --no-silent"
+    "deploy:github": "ng deploy --dir=www/ --no-nojekyll --base-href=/urban-echo/ --repo=https://github.com/Eddine84/urban-echo.git --name='eddine84' --email='eddine.fersadou@gmail.com' --no-silent"
   },
   "private": true,
   "dependencies": {

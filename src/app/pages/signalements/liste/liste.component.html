@@ -1,18 +1,47 @@
-<app-signalement-large [signalementFenetre]="selectedSignalement" />
+@if(signalements().length > 0){
 
+<app-signalement-large [signalementFenetre]="selectedSignalement()" />
+}@else {
+<ion-card>
+  <h1 style="padding-top: 15rem">
+    traviller a afficher un template static html
+  </h1>
+</ion-card>
+}
+
+<ion-item>
+  <ion-select
+    aria-label="Recherches"
+    interface="action-sheet"
+    placeholder="Filter signalements"
+    (ionChange)="onChangeSignalementsFilter(filter.value)"
+    #filter
+  >
+    <ion-select-option value="all">All</ion-select-option>
+    <ion-select-option value="inProgress">Status: En cours</ion-select-option>
+    <ion-select-option value="resolved">Status: Résolus</ion-select-option>
+    <ion-select-option value="mostConfirmed"
+      >Le plus confirmés</ion-select-option
+    >
+    <ion-select-option value="mostRecent">Les plus récentes</ion-select-option>
+    <ion-select-option value="oldest">Les plus anciennes</ion-select-option>
+  </ion-select>
+</ion-item>
 <ion-content>
-  @for(signalement of signalements; track signalement.id){
+  @for(signalement of signalements(); track signalement.id){
   <ion-list>
     <app-signalement-small
       [signalement]="signalement"
       (select)="onSelect($event)"
       [selected]="selectedSignalementId() === signalement.id"
     /> </ion-list
-  >}
-  <ion-infinite-scroll>
+  >}@empty {
+  <p>aucune signalement pour le moment....</p>
+  }
+  <!-- <ion-infinite-scroll>
     <ion-infinite-scroll-content
       loadingText="Please wait..."
       loadingSpinner="bubbles"
     ></ion-infinite-scroll-content>
-  </ion-infinite-scroll>
+  </ion-infinite-scroll> -->
 </ion-content>
