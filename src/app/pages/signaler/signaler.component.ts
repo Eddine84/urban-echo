@@ -1,5 +1,6 @@
 import {
   Component,
+  DestroyRef,
   ElementRef,
   ViewChild,
   inject,
@@ -50,6 +51,7 @@ import {
 } from 'ionicons/icons';
 import { MapboxService } from 'src/app/services/mapbox.service';
 import { SignalementsService } from 'src/app/services/signalements.service';
+import { Signalemenent } from '../signalements/signalement.model';
 @Component({
   selector: 'app-signaler',
   templateUrl: './signaler.component.html',
@@ -93,6 +95,7 @@ export class SignalerComponent {
   public photoService = inject(PhotoService);
   public locationService = inject(LocationService);
   public mapboxService = inject(MapboxService);
+  private destroyRef = inject(DestroyRef);
 
   @ViewChild('modal', { static: true }) modal!: IonModal;
   @ViewChild('form') form?: ElementRef<HTMLFormElement>;
@@ -140,12 +143,13 @@ export class SignalerComponent {
   async getCurrentLocation() {
     this.selectedAdresse.update((prev) => '');
     const position = await this.locationService.getCurrentPosition();
+
     if (position) {
       this.signalementPosition.lat = position.latitude;
       this.signalementPosition.lng = position.longitude;
       console.log('user position is', position);
 
-      this.mapboxService
+      const addressSubscription = this.mapboxService
         .getAdresseFromCoords(position.latitude, position.longitude)
         .subscribe({
           next: (response) => {
@@ -156,16 +160,27 @@ export class SignalerComponent {
             console.error("Erreur lors de la récupération de l'adresse:", err);
           },
         });
+
+      this.destroyRef.onDestroy(() => {
+        addressSubscription.unsubscribe();
+      });
     }
   }
 
   search(event: any) {
     const searchTerm = event.target.value.toLowerCase();
     if (searchTerm && searchTerm.length > 0) {
-      this.mapboxService.search_word(searchTerm).subscribe({
-        next: (features) => {
-          this.mapboxService.address = features.map((feat) => feat.place_name);
-        },
+      const mapboxSubscription = this.mapboxService
+        .search_word(searchTerm)
+        .subscribe({
+          next: (features) => {
+            this.mapboxService.address = features.map(
+              (feat) => feat.place_name
+            );
+          },
+        });
+      this.destroyRef.onDestroy(() => {
+        mapboxSubscription.unsubscribe();
       });
     } else {
       this.mapboxService.address = [];
@@ -178,7 +193,8 @@ export class SignalerComponent {
   }
 
   async onFormSubmit() {
-    const newSignalement = {
+    const newSignalement: Signalemenent = {
+      id: '',
       title: this.entredTitle,
       location: this.selectedAdresse(),
       date: new Date().toISOString(),
@@ -189,10 +205,21 @@ export class SignalerComponent {
       coordinates: this.signalementPosition,
       category: this.selectedType,
       recipient: this.selectedDestinataires,
+      status: 'En cours',
+      resolutionComment: '',
+      confirmations: 0,
+      confirmedByUsers: [],
+      userId: crypto.randomUUID(),
     };
 
     console.log(newSignalement);
-    this.signalementsService.addSignalement(newSignalement);
+    try {
+      await this.signalementsService.addSignalement(newSignalement);
+      console.log('Signalement ajouté avec succès');
+    } catch (error) {
+      console.error("Erreur lors de l'ajout du signalement:", error);
+    }
+
     this.form?.nativeElement.reset();
     this.selectedDestinataires = [];
     this.selectedType = '';

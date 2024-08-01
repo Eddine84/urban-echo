@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable, signal } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { Observable } from 'rxjs';
@@ -26,7 +26,7 @@ export class MapboxService {
   private mapboxToken =
     'pk.eyJ1IjoiZHpmdWxsc3RhY2tkZXYiLCJhIjoiY2x2eWJkejkzMjVodTJrbnlvaGs2c2Y0ZyJ9.IVAMRDDapDnAT7KWCYk4mA';
 
-  constructor(private http: HttpClient) {}
+  private http = inject(HttpClient);
 
   search_word(query: string) {
     const url = 'https://api.mapbox.com/geocoding/v5/mapbox.places/';
@@ -47,8 +47,6 @@ export class MapboxService {
 
   getAdresseFromCoords(lat: number, lng: number): Observable<any> {
     const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?types=address&access_token=${environment.mapbox.accessToken}`;
-    return this.http.get(url).pipe(
-      map((response) => response) // Vous pouvez ajuster la transformation selon vos besoins
-    );
+    return this.http.get(url).pipe(map((response) => response));
   }
 }

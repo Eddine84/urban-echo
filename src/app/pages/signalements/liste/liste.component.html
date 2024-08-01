@@ -1,13 +1,36 @@
-@if(signalements().length > 0){
+@if(isFetching() && !error()) {
+<ion-card>
+  <div
+    style="
+      height: 100vh;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    "
+  >
+    <h1 style="text-align: center">chargement des signalement en cours...</h1>
+  </div>
+</ion-card>
+} @if( error()) {
+<ion-card>
+  <div
+    style="
+      height: 100vh;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    "
+  >
+    <h1 style="text-align: center">
+      une erreur s'est produite , veuillez réesayer plus tard... {{ error() }}
+    </h1>
+  </div>
+</ion-card>
+} @if(signalements()){
 
 <app-signalement-large [signalementFenetre]="selectedSignalement()" />
-}@else {
-<ion-card>
-  <h1 style="padding-top: 15rem">
-    traviller a afficher un template static html
-  </h1>
-</ion-card>
-}
 
 <ion-item>
   <ion-select
@@ -33,7 +56,7 @@
     <app-signalement-small
       [signalement]="signalement"
       (select)="onSelect($event)"
-      [selected]="selectedSignalementId() === signalement.id"
+      [selected]="selectedSignalement().id === signalement.id"
     /> </ion-list
   >}@empty {
   <p>aucune signalement pour le moment....</p>
@@ -45,3 +68,4 @@
     ></ion-infinite-scroll-content>
   </ion-infinite-scroll> -->
 </ion-content>
+}

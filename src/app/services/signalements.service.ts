@@ -1,10 +1,16 @@
-import { Injectable, signal } from '@angular/core';
+import { DestroyRef, Injectable, inject, signal } from '@angular/core';
 import {
   SignalStatus,
   type Signalemenent,
 } from '../pages/signalements/signalement.model';
+import { Observable } from 'rxjs';
+import { Firestore, collection, collectionData } from '@angular/fire/firestore';
+import { addDoc, doc, setDoc } from 'firebase/firestore';
+
 @Injectable({ providedIn: 'root' })
 export class SignalementsService {
+  private firestore = inject(Firestore);
+  private destroRef = inject(DestroyRef);
   signalementsData: Signalemenent[] = [
     {
       id: '1',
@@ -265,24 +271,36 @@ export class SignalementsService {
   private signalements = signal<Signalemenent[]>(this.signalementsData);
   allSignalement = this.signalements.asReadonly();
 
+  //
+  loadSignalements() {
+    return this.fetchSignalements();
+  }
+  //
   getSelectedSignalement(selectedSignalementId: string) {
     return this.signalements().find(
       (signalement) => signalement.id === selectedSignalementId
     );
   }
 
-  addSignalement(singleSignalement: any) {
-    const newSignalement = {
-      ...singleSignalement,
-      id: crypto.randomUUID(),
-      status: 'En cours',
-      resolutionComment: '',
-      confirmations: 0,
-      confirmedByUsers: [],
-      userId: crypto.randomUUID(),
-    };
+  // addSignalement(singleSignalement: any) {
+  //   const newSignalement = {
+  //     ...singleSignalement,
+  //     id: crypto.randomUUID(),
+  //     status: 'En cours',
+  //     resolutionComment: '',
+  //     confirmations: 0,
+  //     confirmedByUsers: [],
+  //     userId: crypto.randomUUID(),
+  //   };
 
-    this.signalements.update((prevList) => [...prevList, newSignalement]);
+  //   this.signalements.update((prevList) => [...prevList, newSignalement]);
+  // }
+
+  async addSignalement(signalement: Signalemenent): Promise<void> {
+    const signalementsCollection = collection(this.firestore, 'signalements');
+    const newDocRef = doc(signalementsCollection);
+    signalement.id = newDocRef.id;
+    return setDoc(newDocRef, signalement);
   }
 
   addConfirmation(selectedSignalementId: string) {
@@ -320,6 +338,12 @@ export class SignalementsService {
           : signalement
       )
     );
-    console.log(this.signalements());
+  }
+
+  private fetchSignalements() {
+    const signalementsCollection = collection(this.firestore, 'signalements');
+    return collectionData(signalementsCollection, {
+      idField: 'id',
+    }) as Observable<Signalemenent[]>;
   }
 }

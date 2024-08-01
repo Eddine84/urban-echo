@@ -1,20 +1,13 @@
 import {
-  AfterViewChecked,
-  AfterViewInit,
   Component,
-  DoCheck,
-  OnChanges,
+  DestroyRef,
   OnInit,
-  SimpleChanges,
-  afterNextRender,
-  afterRender,
   computed,
   inject,
   signal,
 } from '@angular/core';
 import { SignalementLargeComponent } from './signalement-large/signalement-large.component';
 import { SignalementSmallComponent } from './signalement-small/signalement-small.component';
-
 import { SignalementsService } from 'src/app/services/signalements.service';
 
 import {
@@ -30,9 +23,11 @@ import {
   IonCard,
   IonSelect,
   IonSelectOption,
+  IonToolbar,
 } from '@ionic/angular/standalone';
-import { interval, single } from 'rxjs';
+
 import { Signalemenent } from '../signalement.model';
+import { catchError, throwError } from 'rxjs';
 
 @Component({
   selector: 'app-liste',
@@ -40,6 +35,7 @@ import { Signalemenent } from '../signalement.model';
   styleUrls: ['./liste.component.scss'],
   standalone: true,
   imports: [
+    IonToolbar,
     IonCard,
     IonAvatar,
     IonInfiniteScroll,
@@ -57,55 +53,71 @@ import { Signalemenent } from '../signalement.model';
   ],
 })
 export class ListeComponent implements OnInit {
+  destroyRef = inject(DestroyRef);
   signalementsService = inject(SignalementsService);
-
   selectedFilter = signal('all');
+  allSignalements = signal<Signalemenent[] | undefined>(undefined);
+  isFetching = signal(false);
+  error = signal('');
 
   signalements = computed(() => {
     switch (this.selectedFilter()) {
       case 'inProgress':
-        return this.signalementsService
-          .allSignalement()
-          .filter((signalement) => signalement.status === 'En cours');
+        return this.allSignalements()!.filter(
+          (signalement) => signalement.status === 'En cours'
+        );
       case 'resolved':
-        return this.signalementsService
-          .allSignalement()
-          .filter((signalement) => signalement.status === 'Résolu');
+        return this.allSignalements()!.filter(
+          (signalement) => signalement.status === 'Résolu'
+        );
       case 'mostConfirmed':
-        return this.signalementsService
-          .allSignalement()
-          .sort((a, b) => b.confirmations - a.confirmations);
+        return this.allSignalements()!.sort(
+          (a, b) => b.confirmations - a.confirmations
+        );
       case 'mostRecent':
-        return this.signalementsService
-          .allSignalement()
-          .sort(
-            (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-          );
+        return this.allSignalements()!.sort(
+          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+        );
       case 'oldest':
-        return this.signalementsService
-          .allSignalement()
-          .sort(
-            (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
-          );
+        return this.allSignalements()!.sort(
+          (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+        );
       default:
-        return this.signalementsService.allSignalement();
+        return this.allSignalements();
     }
   });
-  selectedSignalementId = signal<string>(this.signalements()[0].id);
-  selectedSignalement = signal<Signalemenent>(this.signalements()[0]);
+  selectedSignalement = signal<any>({});
 
   onSelect(id: string) {
-    this.selectedSignalementId.set(id);
-    this.selectedSignalement.set(
-      this.signalementsService.getSelectedSignalement(
-        this.selectedSignalementId()
-      )!
-    );
+    // this.selectedSignalement.update(
+    //   () => this.signalementsService.getSelectedSignalement(id)!
+    // );
   }
 
   onChangeSignalementsFilter(filter: string) {
     this.selectedFilter.set(filter);
   }
 
-  ngOnInit() {}
+  //signalementts$?: Observable<Signalemenent[]>;
+  ngOnInit() {
+    this.isFetching.set(true);
+    const loadSignalementSubsciption = this.signalementsService
+      .loadSignalements()
+
+      .subscribe({
+        next: (data) => {
+          this.allSignalements.set(data);
+          this.isFetching.set(false);
+          console.log(data);
+          this.selectedSignalement = signal<Signalemenent>(data[0]);
+        },
+        error: (error) => {
+          console.log(error);
+          this.error.set('chargement des signalement en cours...');
+        },
+      });
+    this.destroyRef.onDestroy(() => {
+      loadSignalementSubsciption.unsubscribe();
+    });
+  }
 }

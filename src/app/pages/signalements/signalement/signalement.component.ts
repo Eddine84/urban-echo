@@ -5,6 +5,7 @@ import {
   Input,
   inject,
   computed,
+  effect,
 } from '@angular/core';
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { type Signalemenent } from '../signalement.model';

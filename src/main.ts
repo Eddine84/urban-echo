@@ -13,14 +13,16 @@ import {
 import { defineCustomElements } from '@ionic/pwa-elements/loader';
 
 import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
-import { provideAuth, getAuth } from '@angular/fire/auth';
 
 import { routes } from './app/app.routes';
 import { AppComponent } from './app/app.component';
 import { provideHttpClient } from '@angular/common/http';
-import { enableProdMode, isDevMode } from '@angular/core';
+
 import { environment } from './environments/environment';
 import { provideServiceWorker } from '@angular/service-worker';
+
+import { provideFirestore, getFirestore } from '@angular/fire/firestore';
+import { enableProdMode, isDevMode } from '@angular/core';
 
 bootstrapApplication(AppComponent, {
   providers: [
@@ -31,11 +33,11 @@ bootstrapApplication(AppComponent, {
       withComponentInputBinding(),
       withPreloading(PreloadAllModules)
     ),
+
+    provideFirebaseApp(() => initializeApp(environment.firebaseConfig)),
+    provideFirestore(() => getFirestore()),
     provideHttpClient(),
-    provideServiceWorker('ngsw-worker.js', {
-      enabled: !isDevMode(),
-      registrationStrategy: 'registerWhenStable:30000',
-    }),
+
     provideServiceWorker('ngsw-worker.js', {
       enabled: !isDevMode(),
       registrationStrategy: 'registerWhenStable:30000',

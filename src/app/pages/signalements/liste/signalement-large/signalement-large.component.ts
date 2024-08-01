@@ -38,7 +38,9 @@ export class SignalementLargeComponent implements OnInit {
   constructor() {
     addIcons({ locationOutline });
   }
-
-  ngOnInit() {}
   signalementFenetre = input.required<Signalemenent>();
+
+  ngOnInit() {
+    console.log('large signalement component');
+  }
 }
