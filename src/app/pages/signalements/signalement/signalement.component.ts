@@ -79,6 +79,9 @@ export class SignalementComponent implements OnInit {
   singleSignalement = signal<Signalemenent | undefined>(undefined);
   isFetching = signal(false);
   error = signal('');
+  showConfimBtn = signal(true);
+  userId = '483bf032-a12d-44f2-b9a9-40392d19e0c7';
+  destinataire = 'service_des_eaux';
 
   signalement = computed(() =>
     this.signalementsService.getSelectedSignalement(
@@ -87,12 +90,10 @@ export class SignalementComponent implements OnInit {
   );
 
   async confirmSignalement() {
-    const userId = 'ELxvP1C6YSOZ3bGYD8FF';
-
     try {
       await this.signalementsService.addConfirmation(
         this.selectedSignalementId()!,
-        userId
+        this.userId
       );
       console.log('Confirmation added successfully');
     } catch (error) {
@@ -101,12 +102,10 @@ export class SignalementComponent implements OnInit {
   }
 
   async removeSignalement() {
-    const userId = '2f2bdb69-1af7-4330-a67a-8eba33f43f42';
-
     try {
       await this.signalementsService.deleteSignalement(
         this.selectedSignalementId()!,
-        userId
+        this.destinataire
       );
       this.router.navigate(['/signalements/liste']);
     } catch (error) {
@@ -114,12 +113,16 @@ export class SignalementComponent implements OnInit {
     }
   }
 
-  updateSignalementStatus() {
-    if (this.signalement()?.status === 'En cours') {
-      this.signalementsService.updateSignalementStatus(
-        this.signalement()?.id!,
-        this.signalement()?.recipient!,
-        'Résolu'
+  async updateSignalementStatus() {
+    try {
+      await this.signalementsService.updateSignalementStatus(
+        this.selectedSignalementId()!,
+        this.destinataire
+      );
+    } catch (error) {
+      console.log(
+        'Erreur lors de la mise a jour du statut du signalement:',
+        error
       );
     }
   }
@@ -132,6 +135,9 @@ export class SignalementComponent implements OnInit {
         next: (data) => {
           this.singleSignalement.set(data);
           this.isFetching.set(false);
+          if (data?.confirmedByUsers.includes(this.userId)) {
+            this.showConfimBtn.set(false);
+          }
         },
         error: (error) => {
           console.log(error);

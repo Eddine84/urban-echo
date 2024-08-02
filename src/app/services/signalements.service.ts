@@ -316,21 +316,25 @@ export class SignalementsService {
     }
   }
 
-  //doit un seul confirmation
-  //je doisverigier dans la liste confimed by user si pas include dans la liste ,je fais un push et je calculer la length
-
-  async deleteSignalement(id: string, userId: string): Promise<void> {
+  async deleteSignalement(id: string, destinataire: string): Promise<void> {
     const signalementDocRef = doc(this.firestore, `signalements/${id}`);
     const signalementSnapshot = await getDoc(signalementDocRef);
 
     if (signalementSnapshot.exists()) {
       const signalementData = signalementSnapshot.data() as Signalemenent;
-
-      if (signalementData.userId === userId) {
+      console.log(destinataire);
+      console.log(signalementData);
+      if (
+        signalementData.id === id &&
+        signalementData.recipient.includes(destinataire)
+      ) {
         await deleteDoc(signalementDocRef);
         console.log('Document successfully deleted!');
       } else {
         console.error('User not authorized to delete this document.');
+        alert(
+          'seulement les diestinarie sont autorisé a cloturer cette annonce'
+        );
         throw new Error('User not authorized to delete this document.');
       }
     } else {
@@ -339,19 +343,39 @@ export class SignalementsService {
     }
   }
 
-  updateSignalementStatus(
+  //je dois creer un login et recuperer l'id de destinarie compte et chequer sur la liste que le signaleur a pusher pour pourvoir verifier si c'est le bon pour autoriser le update
+  async updateSignalementStatus(
     selectedSignalementId: string,
-    destinataires: string[],
-    newStatus: 'Résolu'
+    destinataire: string
   ) {
-    this.signalements.update((oldSignalements) =>
-      oldSignalements.map((signalement) =>
-        signalement.id === selectedSignalementId &&
-        signalement.recipient.some((item) => destinataires.includes(item))
-          ? { ...signalement, status: newStatus }
-          : signalement
-      )
+    const signalementDocRef = doc(
+      this.firestore,
+      `signalements/${selectedSignalementId}`
     );
+    const signalementSnapshot = await getDoc(signalementDocRef);
+    if (signalementSnapshot.exists()) {
+      const signalementData = signalementSnapshot.data() as Signalemenent;
+
+      if (
+        signalementData.id === selectedSignalementId &&
+        signalementData.recipient.includes(destinataire)
+      ) {
+        signalementData.status = 'Résolu';
+        await setDoc(signalementDocRef, signalementData);
+        console.log('Signalement status updated to "Résolu".');
+      } else {
+        console.error('User not authorized to change status on this document.');
+        alert(
+          'seulement les diestinarie sont autorisé a changer le statut  cette annonce'
+        );
+        throw new Error(
+          'User not authorized to change status of this document.'
+        );
+      }
+    } else {
+      console.error('No such document!');
+      throw new Error('No such document!');
+    }
   }
 
   private fetchSignalements() {

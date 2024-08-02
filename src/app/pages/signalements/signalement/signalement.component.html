@@ -74,9 +74,13 @@
       }@else {
       <ion-icon name="checkmark-circle-outline"></ion-icon>
       } -->
+
+      @if(showConfimBtn()){
       <ion-fab-button (click)="confirmSignalement()">
         <ion-icon name="add"></ion-icon>
       </ion-fab-button>
+
+      }
 
       <ion-fab-button (click)="removeSignalement()">
         <ion-icon name="trash-outline"></ion-icon>
