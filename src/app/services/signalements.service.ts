@@ -4,8 +4,13 @@ import {
   type Signalemenent,
 } from '../pages/signalements/signalement.model';
 import { Observable } from 'rxjs';
-import { Firestore, collection, collectionData } from '@angular/fire/firestore';
-import { addDoc, doc, setDoc } from 'firebase/firestore';
+import {
+  Firestore,
+  collection,
+  collectionData,
+  docData,
+} from '@angular/fire/firestore';
+import { addDoc, deleteDoc, doc, getDoc, setDoc } from 'firebase/firestore';
 
 @Injectable({ providedIn: 'root' })
 export class SignalementsService {
@@ -30,7 +35,7 @@ export class SignalementsService {
         lng: 6.1432,
       },
       category: 'Infrastructure',
-      confirmations: 3,
+
       confirmedByUsers: ['123123', 'asd123123'],
       resolutionComment: '',
       recipient: ['Service des routes et mobilité, Genève'],
@@ -53,7 +58,7 @@ export class SignalementsService {
         lng: 6.1484,
       },
       category: 'Éclairage public',
-      confirmations: 5,
+
       confirmedByUsers: ['123123', 'asd123123'],
       resolutionComment: 'Le lampadaire a été remplacé par un nouveau.',
       recipient: ["Service de l'éclairage public, Genève"],
@@ -76,7 +81,7 @@ export class SignalementsService {
         lng: 6.147,
       },
       category: 'Canalisation',
-      confirmations: 2,
+
       confirmedByUsers: ['123123', 'asd123123'],
       resolutionComment: '',
       recipient: ['Service des eaux, Genève'],
@@ -99,7 +104,7 @@ export class SignalementsService {
         lng: 6.139,
       },
       category: 'Propreté',
-      confirmations: 4,
+
       confirmedByUsers: ['123123', 'asd123123'],
       resolutionComment:
         'Les graffitis ont été nettoyés par une équipe de nettoyage.',
@@ -122,7 +127,7 @@ export class SignalementsService {
         lng: 6.1457,
       },
       category: 'Végétation',
-      confirmations: 3,
+
       confirmedByUsers: ['123123', 'asd123123'],
       resolutionComment: '',
       recipient: ['Service des espaces verts, Genève'],
@@ -145,7 +150,7 @@ export class SignalementsService {
         lng: 6.1466,
       },
       category: 'Véhicules',
-      confirmations: 6,
+
       confirmedByUsers: ['123123', 'asd123123'],
       resolutionComment: '',
       recipient: ['Police municipale, Genève'],
@@ -168,7 +173,7 @@ export class SignalementsService {
         lng: 6.1483,
       },
       category: 'Propreté',
-      confirmations: 5,
+
       confirmedByUsers: ['123123', 'asd123123'],
       resolutionComment:
         'Les déchets ont été enlevés par le service de propreté de la ville.',
@@ -192,7 +197,7 @@ export class SignalementsService {
         lng: 6.1477,
       },
       category: 'Signalisation',
-      confirmations: 7,
+
       confirmedByUsers: ['123123', 'asd123123'],
       resolutionComment: '',
       recipient: ['Service de la mobilité, Genève'],
@@ -215,7 +220,7 @@ export class SignalementsService {
         lng: 6.1505,
       },
       category: 'Signalisation',
-      confirmations: 4,
+
       confirmedByUsers: ['123123', 'asd123123'],
       resolutionComment: 'Le panneau de signalisation a été remplacé.',
       recipient: ['Service de la mobilité, Genève'],
@@ -238,7 +243,7 @@ export class SignalementsService {
         lng: 6.1481,
       },
       category: 'Infrastructure',
-      confirmations: 3,
+
       confirmedByUsers: ['123123', 'asd123123'],
       resolutionComment: '',
       recipient: ['Service des routes et mobilité, Genève'],
@@ -261,7 +266,7 @@ export class SignalementsService {
         lng: 6.1209,
       },
       category: 'Comportement',
-      confirmations: 1,
+
       confirmedByUsers: ['123123', 'asd123123'],
       resolutionComment: '',
       recipient: ['Service clientèle Migros'],
@@ -282,47 +287,56 @@ export class SignalementsService {
     );
   }
 
-  // addSignalement(singleSignalement: any) {
-  //   const newSignalement = {
-  //     ...singleSignalement,
-  //     id: crypto.randomUUID(),
-  //     status: 'En cours',
-  //     resolutionComment: '',
-  //     confirmations: 0,
-  //     confirmedByUsers: [],
-  //     userId: crypto.randomUUID(),
-  //   };
-
-  //   this.signalements.update((prevList) => [...prevList, newSignalement]);
-  // }
-
   async addSignalement(signalement: Signalemenent): Promise<void> {
     const signalementsCollection = collection(this.firestore, 'signalements');
     const newDocRef = doc(signalementsCollection);
     signalement.id = newDocRef.id;
+    signalement.confirmedByUsers = [signalement.id];
     return setDoc(newDocRef, signalement);
   }
 
-  addConfirmation(selectedSignalementId: string) {
-    this.signalements.update((signalements) =>
-      signalements.map((signalement) =>
-        signalement.id === selectedSignalementId
-          ? { ...signalement, confirmations: signalement.confirmations + 1 }
-          : signalement
-      )
+  async addConfirmation(
+    selectedSignalementId: string,
+    userId: string
+  ): Promise<void> {
+    const signalementDocRef = doc(
+      this.firestore,
+      `signalements/${selectedSignalementId}`
     );
+    const signalementSnapshot = await getDoc(signalementDocRef);
+    if (signalementSnapshot.exists()) {
+      const signalementData = signalementSnapshot.data() as Signalemenent;
+      if (!signalementData.confirmedByUsers.includes(userId)) {
+        signalementData.confirmedByUsers.push(userId);
+        await setDoc(signalementDocRef, signalementData);
+      }
+    } else {
+      console.error('Signalement does not exist.');
+      throw new Error('Signalement does not exist.');
+    }
   }
 
-  removeSignalement(selectedSignalementId: string, userId: string) {
-    this.signalements.update((oldSignalements) =>
-      oldSignalements.filter(
-        (signalement) =>
-          !(
-            signalement.id === selectedSignalementId &&
-            signalement.userId === userId
-          )
-      )
-    );
+  //doit un seul confirmation
+  //je doisverigier dans la liste confimed by user si pas include dans la liste ,je fais un push et je calculer la length
+
+  async deleteSignalement(id: string, userId: string): Promise<void> {
+    const signalementDocRef = doc(this.firestore, `signalements/${id}`);
+    const signalementSnapshot = await getDoc(signalementDocRef);
+
+    if (signalementSnapshot.exists()) {
+      const signalementData = signalementSnapshot.data() as Signalemenent;
+
+      if (signalementData.userId === userId) {
+        await deleteDoc(signalementDocRef);
+        console.log('Document successfully deleted!');
+      } else {
+        console.error('User not authorized to delete this document.');
+        throw new Error('User not authorized to delete this document.');
+      }
+    } else {
+      console.error('No such document!');
+      throw new Error('No such document!');
+    }
   }
 
   updateSignalementStatus(
@@ -345,5 +359,12 @@ export class SignalementsService {
     return collectionData(signalementsCollection, {
       idField: 'id',
     }) as Observable<Signalemenent[]>;
+  }
+
+  getSignalementById(id: string): Observable<Signalemenent | undefined> {
+    const signalementDoc = doc(this.firestore, `signalements/${id}`);
+    return docData(signalementDoc, { idField: 'id' }) as Observable<
+      Signalemenent | undefined
+    >;
   }
 }

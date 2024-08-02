@@ -6,6 +6,8 @@ import {
   inject,
   computed,
   effect,
+  signal,
+  DestroyRef,
 } from '@angular/core';
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { type Signalemenent } from '../signalement.model';
@@ -71,8 +73,12 @@ export class SignalementComponent implements OnInit {
     });
   }
   router = inject(Router);
+  destroyRef = inject(DestroyRef);
   signalementsService = inject(SignalementsService);
   selectedSignalementId = input<string>();
+  singleSignalement = signal<Signalemenent | undefined>(undefined);
+  isFetching = signal(false);
+  error = signal('');
 
   signalement = computed(() =>
     this.signalementsService.getSelectedSignalement(
@@ -80,18 +86,31 @@ export class SignalementComponent implements OnInit {
     )
   );
 
-  confirmSignalement() {
-    this.signalementsService.addConfirmation(this.selectedSignalementId()!);
+  async confirmSignalement() {
+    const userId = 'ELxvP1C6YSOZ3bGYD8FF';
+
+    try {
+      await this.signalementsService.addConfirmation(
+        this.selectedSignalementId()!,
+        userId
+      );
+      console.log('Confirmation added successfully');
+    } catch (error) {
+      console.error('Error adding confirmation:', error);
+    }
   }
 
-  removeSignalement() {
-    const signalement = this.signalement();
-    if (signalement) {
-      this.signalementsService.removeSignalement(
+  async removeSignalement() {
+    const userId = '2f2bdb69-1af7-4330-a67a-8eba33f43f42';
+
+    try {
+      await this.signalementsService.deleteSignalement(
         this.selectedSignalementId()!,
-        signalement.userId
+        userId
       );
       this.router.navigate(['/signalements/liste']);
+    } catch (error) {
+      console.error('Erreur lors de la suppression du signalement:', error);
     }
   }
 
@@ -105,5 +124,22 @@ export class SignalementComponent implements OnInit {
     }
   }
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.isFetching.set(true);
+    const signalementSubsciption = this.signalementsService
+      .getSignalementById(this.selectedSignalementId()!)
+      .subscribe({
+        next: (data) => {
+          this.singleSignalement.set(data);
+          this.isFetching.set(false);
+        },
+        error: (error) => {
+          console.log(error);
+          this.error.set('chargement du signalement en cours...');
+        },
+      });
+    this.destroyRef.onDestroy(() => {
+      signalementSubsciption.unsubscribe();
+    });
+  }
 }

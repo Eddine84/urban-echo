@@ -207,7 +207,7 @@ export class SignalerComponent {
       recipient: this.selectedDestinataires,
       status: 'En cours',
       resolutionComment: '',
-      confirmations: 0,
+
       confirmedByUsers: [],
       userId: crypto.randomUUID(),
     };
@@ -216,6 +216,7 @@ export class SignalerComponent {
     try {
       await this.signalementsService.addSignalement(newSignalement);
       console.log('Signalement ajouté avec succès');
+      this.router.navigate(['/signalements/liste']);
     } catch (error) {
       console.error("Erreur lors de l'ajout du signalement:", error);
     }
@@ -229,7 +230,5 @@ export class SignalerComponent {
     // Ajouter le signalement à Firestore
     // const signalementsCollection = this.firestore.collection('signalements');
     // await signalementsCollection.add(singleSignalement);
-
-    this.router.navigate(['/signalements/liste']);
   }
 }

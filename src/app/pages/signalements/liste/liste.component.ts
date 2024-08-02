@@ -72,7 +72,7 @@ export class ListeComponent implements OnInit {
         );
       case 'mostConfirmed':
         return this.allSignalements()!.sort(
-          (a, b) => b.confirmations - a.confirmations
+          (a, b) => b.confirmedByUsers.length - a.confirmedByUsers.length
         );
       case 'mostRecent':
         return this.allSignalements()!.sort(
@@ -89,9 +89,9 @@ export class ListeComponent implements OnInit {
   selectedSignalement = signal<any>({});
 
   onSelect(id: string) {
-    // this.selectedSignalement.update(
-    //   () => this.signalementsService.getSelectedSignalement(id)!
-    // );
+    this.selectedSignalement.set(
+      this.allSignalements()?.find((signalement) => signalement.id === id)
+    );
   }
 
   onChangeSignalementsFilter(filter: string) {
@@ -101,7 +101,7 @@ export class ListeComponent implements OnInit {
   //signalementts$?: Observable<Signalemenent[]>;
   ngOnInit() {
     this.isFetching.set(true);
-    const loadSignalementSubsciption = this.signalementsService
+    const loadSignalementsSubsciption = this.signalementsService
       .loadSignalements()
 
       .subscribe({
@@ -117,7 +117,7 @@ export class ListeComponent implements OnInit {
         },
       });
     this.destroyRef.onDestroy(() => {
-      loadSignalementSubsciption.unsubscribe();
+      loadSignalementsSubsciption.unsubscribe();
     });
   }
 }

@@ -1,3 +1,35 @@
+@if(isFetching() && !error()) {
+<ion-card>
+  <div
+    style="
+      height: 100vh;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    "
+  >
+    <h1 style="text-align: center">chargement du signalement en cours...</h1>
+  </div>
+</ion-card>
+} @if( error()) {
+<ion-card>
+  <div
+    style="
+      height: 100vh;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    "
+  >
+    <h1 style="text-align: center">
+      une erreur s'est produite , veuillez réesayer plus tard... {{ error() }}
+    </h1>
+  </div>
+</ion-card>
+} @if(singleSignalement()){
+
 <ion-content>
   <ion-card style="padding-top: 3.5rem; position: relative">
     <ion-button
@@ -14,10 +46,10 @@
       >back</ion-button
     >
     <swiper-container [loop]="true" [pagination]="true">
-      @for(image of signalement()?.images; track image) {
+      @for(image of singleSignalement()?.images; track image) {
       <swiper-slide>
         <img
-          [alt]="signalement()?.title"
+          [alt]="singleSignalement()?.title"
           [src]="image"
           style="height: 100%; width: 100%; object-fit: contain"
         />
@@ -25,18 +57,18 @@
       }
     </swiper-container>
     <ion-card-header>
-      <ion-card-title>{{ signalement()?.title }}</ion-card-title>
+      <ion-card-title>{{ singleSignalement()?.title }}</ion-card-title>
       <ion-card-subtitle>{{
-        signalement()?.date | date : "full"
+        singleSignalement()?.date | date : "full"
       }}</ion-card-subtitle>
     </ion-card-header>
 
     <ion-card-content>
-      <p>{{ signalement()?.content }}</p>
-      <p>Lieu : {{ signalement()?.location }}</p>
-      <p>Catégorie : {{ signalement()?.category }}</p>
-      <p>Confirmations : {{ signalement()?.confirmations }}</p>
-      <p>statut : {{ signalement()?.status }}</p>
+      <p>{{ singleSignalement()?.content }}</p>
+      <p>Lieu : {{ singleSignalement()?.location }}</p>
+      <p>Catégorie : {{ singleSignalement()?.category }}</p>
+      <p>Confirmations : {{ singleSignalement()?.confirmedByUsers?.length }}</p>
+      <p>statut : {{ singleSignalement()?.status }}</p>
       <!-- @if(signalement?.confirmations > 0){
       <ion-icon name="checkmark-circle-outline"></ion-icon>
       }@else {
@@ -49,11 +81,13 @@
       <ion-fab-button (click)="removeSignalement()">
         <ion-icon name="trash-outline"></ion-icon>
       </ion-fab-button>
-      @if(signalement()?.resolutionComment) {
-      <p>Commentaire de résolution : {{ signalement()?.resolutionComment }}</p>
+      @if(singleSignalement()?.resolutionComment) {
+      <p>
+        Commentaire de résolution : {{ singleSignalement()?.resolutionComment }}
+      </p>
       }
     </ion-card-content>
-    @if(signalement()?.status === 'En cours'){
+    @if(singleSignalement()?.status === 'En cours'){
 
     <ion-button (click)="updateSignalementStatus()"
       >Update signal status</ion-button
@@ -61,3 +95,4 @@
     }
   </ion-card>
 </ion-content>
+}

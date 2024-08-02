@@ -11,7 +11,7 @@ export interface Signalemenent {
   content: string;
   coordinates: { lat: number; lng: number };
   category: string;
-  confirmations: number;
+
   confirmedByUsers: string[];
   resolutionComment: string;
   recipient: string[];
