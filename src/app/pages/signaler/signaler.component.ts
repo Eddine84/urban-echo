@@ -134,7 +134,7 @@ export class SignalerComponent {
   }
 
   async addPhoto() {
-    this.photoService.addNewToGallery();
+    await this.photoService.addNewToGallery();
   }
   removePhoto(index: number) {
     this.photoService.removePhoto(index);
@@ -212,7 +212,6 @@ export class SignalerComponent {
       userId: crypto.randomUUID(),
     };
 
-    console.log(newSignalement);
     try {
       await this.signalementsService.addSignalement(newSignalement);
       console.log('Signalement ajouté avec succès');

@@ -80,14 +80,10 @@ export class SignalementComponent implements OnInit {
   isFetching = signal(false);
   error = signal('');
   showConfimBtn = signal(true);
-  userId = '483bf032-a12d-44f2-b9a9-40392d19e0c7';
+  userId = 'c7167837-778a-4594-9721-b7e049012e34';
   destinataire = 'service_des_eaux';
 
-  signalement = computed(() =>
-    this.signalementsService.getSelectedSignalement(
-      this.selectedSignalementId()!
-    )
-  );
+  signalement = computed(() => this.singleSignalement());
 
   async confirmSignalement() {
     try {
