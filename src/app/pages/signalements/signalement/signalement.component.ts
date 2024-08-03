@@ -38,6 +38,8 @@ import {
 } from '@ionic/angular/standalone';
 import { SignalementsService } from 'src/app/services/signalements.service';
 import { CommonModule, DatePipe } from '@angular/common';
+import { ToastService } from 'src/app/services/toast.service';
+
 @Component({
   selector: 'app-signalement',
   templateUrl: './signalement.component.html',
@@ -73,6 +75,7 @@ export class SignalementComponent implements OnInit {
     });
   }
   router = inject(Router);
+  toastService = inject(ToastService);
   destroyRef = inject(DestroyRef);
   signalementsService = inject(SignalementsService);
   selectedSignalementId = input<string>();
@@ -80,8 +83,8 @@ export class SignalementComponent implements OnInit {
   isFetching = signal(false);
   error = signal('');
   showConfimBtn = signal(true);
-  userId = 'c7167837-778a-4594-9721-b7e049012e34';
-  destinataire = 'service_des_eaux';
+  userId = this.signalementsService.userId();
+  destinataire = 'police_municipale';
 
   signalement = computed(() => this.singleSignalement());
 
@@ -105,6 +108,11 @@ export class SignalementComponent implements OnInit {
       );
       this.router.navigate(['/signalements/liste']);
     } catch (error) {
+      this.toastService.presentToast(
+        'top',
+        'seulement les diestinarie sont autorisé a cloturer cette annonce'
+      );
+
       console.error('Erreur lors de la suppression du signalement:', error);
     }
   }
@@ -115,13 +123,52 @@ export class SignalementComponent implements OnInit {
         this.selectedSignalementId()!,
         this.destinataire
       );
+      this.toastService.presentToast(
+        'top',
+        'le signalement a été marqué comme resolut'
+      );
     } catch (error) {
-      console.log(
-        'Erreur lors de la mise a jour du statut du signalement:',
-        error
+      console.log(error);
+      this.toastService.presentToast(
+        'top',
+        'seulement les diestinarie sont autorisé a changer le statut  cette annonce'
       );
     }
   }
+
+  public actionSheetButtonsUpdate = [
+    {
+      text: 'Update',
+
+      handler: () => {
+        this.updateSignalementStatus();
+      },
+    },
+
+    {
+      text: 'Cancel',
+      role: 'cancel',
+      data: {
+        action: 'cancel',
+      },
+    },
+  ];
+
+  public actionSheetButtonsRemove = [
+    {
+      text: 'Remove',
+      handler: () => {
+        this.removeSignalement();
+      },
+    },
+    {
+      text: 'Cancel',
+      role: 'cancel',
+      data: {
+        action: 'cancel',
+      },
+    },
+  ];
 
   ngOnInit() {
     this.isFetching.set(true);

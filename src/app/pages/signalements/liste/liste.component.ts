@@ -27,7 +27,6 @@ import {
 } from '@ionic/angular/standalone';
 
 import { Signalemenent } from '../signalement.model';
-import { catchError, throwError } from 'rxjs';
 
 @Component({
   selector: 'app-liste',

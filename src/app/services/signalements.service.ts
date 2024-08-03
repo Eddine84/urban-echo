@@ -17,6 +17,8 @@ export class SignalementsService {
   private firestore = inject(Firestore);
   private destroRef = inject(DestroyRef);
 
+  userId = signal('');
+
   loadSignalements() {
     return this.fetchSignalements();
   }
@@ -25,7 +27,7 @@ export class SignalementsService {
     const signalementsCollection = collection(this.firestore, 'signalements');
     const newDocRef = doc(signalementsCollection);
     signalement.id = newDocRef.id;
-    signalement.confirmedByUsers = [signalement.id];
+    // signalement.confirmedByUsers = [signalement.id];
     return setDoc(newDocRef, signalement);
   }
 
@@ -40,6 +42,7 @@ export class SignalementsService {
     const signalementSnapshot = await getDoc(signalementDocRef);
     if (signalementSnapshot.exists()) {
       const signalementData = signalementSnapshot.data() as Signalemenent;
+      // he chercher sur db qu il ya pas l'id user pour le laisser faire un signalement
       if (!signalementData.confirmedByUsers.includes(userId)) {
         signalementData.confirmedByUsers.push(userId);
         await setDoc(signalementDocRef, signalementData);
@@ -65,10 +68,6 @@ export class SignalementsService {
         await deleteDoc(signalementDocRef);
         console.log('Document successfully deleted!');
       } else {
-        console.error('User not authorized to delete this document.');
-        alert(
-          'seulement les diestinarie sont autorisé a cloturer cette annonce'
-        );
         throw new Error('User not authorized to delete this document.');
       }
     } else {
@@ -98,16 +97,11 @@ export class SignalementsService {
         await setDoc(signalementDocRef, signalementData);
         console.log('Signalement status updated to "Résolu".');
       } else {
-        console.error('User not authorized to change status on this document.');
-        alert(
-          'seulement les diestinarie sont autorisé a changer le statut  cette annonce'
-        );
         throw new Error(
-          'User not authorized to change status of this document.'
+          'seulement les diestinarie sont autorisé a changer le statut  cette annonce'
         );
       }
     } else {
-      console.error('No such document!');
       throw new Error('No such document!');
     }
   }

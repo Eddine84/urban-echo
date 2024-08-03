@@ -82,9 +82,15 @@
 
       }
 
-      <ion-fab-button (click)="removeSignalement()">
+      <ion-button id="open-action-sheet-remove">
         <ion-icon name="trash-outline"></ion-icon>
-      </ion-fab-button>
+      </ion-button>
+
+      <ion-action-sheet
+        trigger="open-action-sheet-remove"
+        header="Actions"
+        [buttons]="actionSheetButtonsRemove"
+      ></ion-action-sheet>
       @if(singleSignalement()?.resolutionComment) {
       <p>
         Commentaire de résolution : {{ singleSignalement()?.resolutionComment }}
@@ -93,9 +99,14 @@
     </ion-card-content>
     @if(singleSignalement()?.status === 'En cours'){
 
-    <ion-button (click)="updateSignalementStatus()"
-      >Update signal status</ion-button
-    >
+    <ion-button id="open-action-sheet">Update signal status</ion-button>
+
+    <ion-action-sheet
+      trigger="open-action-sheet"
+      header="Actions"
+      [buttons]="actionSheetButtonsUpdate"
+    ></ion-action-sheet>
+
     }
   </ion-card>
 </ion-content>

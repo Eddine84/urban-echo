@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import {
   IonApp,
   IonRouterOutlet,
@@ -11,6 +11,7 @@ import {
 import { RouterOutlet } from '@angular/router';
 import { addIcons } from 'ionicons';
 import { RouterLink, RouterLinkActive } from '@angular/router';
+import { AuthService } from './services/auth.service';
 
 import { CommonModule } from '@angular/common';
 import {
@@ -21,11 +22,10 @@ import {
   library,
   search,
   personOutline,
-  lockClosedOutline,
-  chevronForward,
   listOutline,
 } from 'ionicons/icons';
 import { register } from 'swiper/element/bundle';
+import { SignalementsService } from './services/signalements.service';
 register();
 
 @Component({
@@ -48,7 +48,7 @@ register();
     CommonModule,
   ],
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
   constructor() {
     addIcons({
       addOutline,
@@ -59,6 +59,20 @@ export class AppComponent {
       search,
       personOutline,
       listOutline,
+    });
+  }
+
+  authService = inject(AuthService);
+  signalementsService = inject(SignalementsService);
+
+  ngOnInit(): void {
+    this.authService.signInAnonymously().then((user) => {
+      if (user) {
+        console.log('Utilisateur anonyme connecté:', user);
+        this.signalementsService.userId.set(user.uid);
+      } else {
+        console.log('Échec de la connexion anonyme.');
+      }
     });
   }
 }

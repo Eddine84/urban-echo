@@ -209,7 +209,7 @@ export class SignalerComponent {
       resolutionComment: '',
 
       confirmedByUsers: [],
-      userId: crypto.randomUUID(),
+      userId: this.signalementsService.userId(),
     };
 
     try {
@@ -225,9 +225,5 @@ export class SignalerComponent {
     this.selectedType = '';
     this.destinatairesSelections = 'aucun';
     this.photoService.photos = [];
-
-    // Ajouter le signalement à Firestore
-    // const signalementsCollection = this.firestore.collection('signalements');
-    // await signalementsCollection.add(singleSignalement);
   }
 }

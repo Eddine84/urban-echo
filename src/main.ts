@@ -20,7 +20,7 @@ import { provideHttpClient } from '@angular/common/http';
 
 import { environment } from './environments/environment';
 import { provideServiceWorker } from '@angular/service-worker';
-
+import { provideAuth, getAuth } from '@angular/fire/auth';
 import { provideFirestore, getFirestore } from '@angular/fire/firestore';
 import { enableProdMode, isDevMode } from '@angular/core';
 
@@ -36,6 +36,7 @@ bootstrapApplication(AppComponent, {
 
     provideFirebaseApp(() => initializeApp(environment.firebaseConfig)),
     provideFirestore(() => getFirestore()),
+    provideAuth(() => getAuth()),
     provideHttpClient(),
 
     provideServiceWorker('ngsw-worker.js', {

@@ -40,7 +40,5 @@ export class SignalementLargeComponent implements OnInit {
   }
   signalementFenetre = input.required<Signalemenent>();
 
-  ngOnInit() {
-    console.log('large signalement component');
-  }
+  ngOnInit() {}
 }
