@@ -2,17 +2,44 @@
   <ion-title class="title">welcome back</ion-title>
   <p class="subTitle">sign in to access your account</p>
 </div>
-<form>
-  <div class="ion-padding">
-    <ion-item>
-      <ion-input placeholder="username" class="input"></ion-input>
-      <ion-icon name="person-outline"></ion-icon>
-    </ion-item>
+<form #form="ngForm" (ngSubmit)="onSubmit(form)">
+  <div div class="ion-padding">
+    <div class="input-container">
+      <input
+        placeholder="username"
+        class="input"
+        name="email"
+        required
+        email
+        ngModel
+        #email="ngModel"
+      />
+      <ion-icon name="person-outline" class="input-icon"></ion-icon>
+    </div>
+    <div class="input-container">
+      <input
+        class="input"
+        placeholder="password"
+        name="password"
+        type="password"
+        required
+        minlength="6"
+        ngModel
+        #password="ngModel"
+      />
+      <ion-icon name="lock-closed-outline" class="input-icon"> </ion-icon>
+    </div>
 
-    <ion-item>
-      <ion-input class="input" placeholder="password"></ion-input>
-      <ion-icon name="lock-closed-outline"> </ion-icon>
-    </ion-item>
+    @if(email.touched && email.dirty && email.invalid ){
+    <div class="error-message">
+      <label class="show"> Addresse email non valide</label>
+    </div>
+    } @if(password.touched && password.dirty && password.invalid ){
+    <div class="error-message">
+      <label class="show">mot de passe non valide</label>
+    </div>
+    }
+    <ion-button type="submit">login</ion-button>
     <div class="forgotPassword">
       <a routerLink="/auth/password-reset" style="color: #ffc33f"
         >forgot password?

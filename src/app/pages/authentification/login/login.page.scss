@@ -1,10 +1,65 @@
-.input {
-  font-size: 300;
+.input-container {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+input {
+  padding: 10px;
+  border: 3px solid transparent;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 1.2rem;
+  border-radius: 0.9rem;
+  background-color: #f1f1f1;
+
+  ::placeholder {
+    text-align: left;
+  }
+
+  &:focus {
+    border-color: #51c2d5; /* Couleur de la bordure lors du focus */
+    outline: none; /* Supprimer la bordure par défaut */
+  }
+}
+
+.input-icon {
+  position: absolute;
+  z-index: 999;
+  right: 15px;
+  font-size: 1.5rem;
+  top: 50%; /* Positionne l'élément à 50% de la hauteur de son conteneur */
+  transform: translateY(-50%);
 }
 ion-item {
   --background: #f1f1f1;
   border-radius: 10px;
   margin-bottom: 16px;
+}
+
+.input.ng-touched {
+  border: none;
+  transition: var(--background) 200ms ease;
+  background: #ffdede;
+  animation: opa 0.5s ease-in-out; /* Ajout de l'animation squeeze */
+}
+
+@keyframes opa {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-15px);
+  }
+  50% {
+    transform: translateX(15px);
+  }
+  75% {
+    transform: translateX(-15px);
+  }
 }
 
 .header {
@@ -29,7 +84,6 @@ ion-item {
   bottom: 0;
   width: 80%;
   right: 0;
-  justify-content: center;
 
   p {
     font-size: 0.9rem;
@@ -41,4 +95,28 @@ ion-item {
 }
 ion-content {
   z-index: 999;
+}
+.error-message {
+  color: red;
+  font-size: 0.9rem;
+  margin-top: 10px;
+  text-align: center;
+  opacity: 0; /* Masquer par défaut */
+  animation: fadeIn 0.5s ease-in-out forwards; /* Animation simple pour l'apparition */
+}
+
+/* Afficher le message d'erreur avec animation */
+.error-message .show {
+  opacity: 1;
+  animation: fadeIn 0.5s ease-in-out forwards; /* Animation simple pour l'apparition */
+}
+
+/* Définir l'animation fadeIn */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
