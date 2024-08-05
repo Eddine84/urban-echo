@@ -1,6 +1,16 @@
-import { Component, OnInit, inject, output } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule, NgForm } from '@angular/forms';
+import {
+  AbstractControl,
+  AsyncValidatorFn,
+  FormControl,
+  FormGroup,
+  FormsModule,
+  NgForm,
+  ReactiveFormsModule,
+  ValidationErrors,
+  Validators,
+} from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import {
   IonContent,
@@ -23,6 +33,7 @@ import {
 import { PasswordResetPage } from '../password-reset/password-reset.page';
 import { AuthService } from 'src/app/services/auth.service';
 import { ToastController } from '@ionic/angular/standalone';
+import { Observable, debounce, debounceTime, of } from 'rxjs';
 @Component({
   selector: 'app-login',
   templateUrl: './login.page.html',
@@ -44,45 +55,95 @@ import { ToastController } from '@ionic/angular/standalone';
     PasswordResetPage,
     RouterLink,
     FormsModule,
+    ReactiveFormsModule,
   ],
 })
 export class LoginPage implements OnInit {
+  private destroyRef = inject(DestroyRef);
+  private authService = inject(AuthService);
   constructor() {
     addIcons({ personOutline, lockClosedOutline, chevronForward });
   }
-  private toastController = inject(ToastController);
-  private authService = inject(AuthService);
+  ngOnInit() {
+    const savedForm = window.localStorage.getItem('saved-login-form');
+    if (savedForm) {
+      const loadedForm = JSON.parse(savedForm);
+      this.loginForm.patchValue({ email: loadedForm.email });
+    }
 
-  async showToast() {
-    const toast = await this.toastController.create({
-      message: 'Invalid values detected, please check your inputs',
-      duration: 2000,
+    const subscription = this.loginForm.valueChanges
+      .pipe(debounceTime(500))
+      .subscribe({
+        next: (value) => {
+          window.localStorage.setItem(
+            'saved-login-form',
+            JSON.stringify({ email: value.email })
+          );
+        },
+      });
+    this.destroyRef.onDestroy(() => {
+      subscription.unsubscribe();
     });
-    toast.present();
   }
-  // email = '';
-  // password = '';
 
-  // async login() {
-  //   const user = await this.authService.login(this.email, this.password);
-  //   if (user) {
-  //     console.log('Utilisateur connecté:', user);
-  //   } else {
-  //     console.log('Échec de la connexion.');
-  //   }
-  // }
-  ngOnInit() {}
+  loginForm = new FormGroup({
+    email: new FormControl('', {
+      validators: [Validators.email, Validators.required],
+    }),
+    password: new FormControl('', {
+      validators: [
+        Validators.required,
+        Validators.minLength(8),
+        passwordStrengthValidator,
+      ],
+    }),
+  });
 
-  onSubmit(formData: NgForm) {
-    if (formData.form.invalid) {
-      // this.showToast();
+  get emailIsInvalid() {
+    return (
+      this.loginForm.controls.email.touched &&
+      this.loginForm.controls.email.dirty &&
+      this.loginForm.controls.email.invalid
+    );
+  }
+  get passwordIsInvalid() {
+    return (
+      this.loginForm.controls.password.touched &&
+      this.loginForm.controls.password.dirty &&
+      this.loginForm.controls.password.invalid
+    );
+  }
+
+  async onSubmit() {
+    if (this.loginForm.invalid) {
       return;
     }
-    const entredEmail = formData.form.value.email;
-    const entredPassword = formData.form.value.password;
-    console.log(entredPassword, entredEmail);
-    console.log(formData);
-
-    formData.form.reset();
+    const enteredEmail = this.loginForm.value.email;
+    const enteredPassword = this.loginForm.value.password;
+    try {
+      const user = await this.authService.login(
+        enteredEmail!,
+        enteredPassword!
+      );
+      if (user) {
+        console.log('User logged in successfully:', user);
+        // Redirigez l'utilisateur ou effectuez d'autres actions nécessaires
+      }
+    } catch (error: any) {
+      console.error('Login failed', error);
+    }
   }
+}
+
+function passwordStrengthValidator(control: AbstractControl) {
+  const hasUpperCase = /[A-Z]/.test(control.value);
+  const hasLowerCase = /[a-z]/.test(control.value);
+  const hasNumeric = /\d/.test(control.value);
+  const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(control.value);
+  const valid = hasUpperCase && hasLowerCase && hasNumeric && hasSpecialChar;
+  if (!valid) {
+    // Retourne un objet d'erreur si le mot de passe ne respecte pas les critères
+    return { weakPassword: true };
+  }
+  return null; // Retourne null si le mot de passe est valide
 }

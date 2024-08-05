@@ -1,7 +1,14 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import {
+  FormControl,
+  FormGroup,
+  FormsModule,
+  ReactiveFormsModule,
+} from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { categories } from '../../signaler/dummy_categories';
+import { Categorie } from '../../signaler/categorie.model';
 import {
   IonContent,
   IonHeader,
@@ -11,6 +18,9 @@ import {
   IonInput,
   IonIcon,
   IonFab,
+  IonSelectOption,
+  IonSelect,
+  IonButton,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
@@ -19,12 +29,15 @@ import {
   chevronForward,
 } from 'ionicons/icons';
 import { PasswordResetPage } from '../password-reset/password-reset.page';
+import { getFirestore, setDoc, doc } from 'firebase/firestore';
+import { AuthService } from 'src/app/services/auth.service';
 @Component({
   selector: 'app-signup',
   templateUrl: './signup.page.html',
   styleUrls: ['./signup.page.scss'],
   standalone: true,
   imports: [
+    IonButton,
     IonFab,
     IonIcon,
     IonInput,
@@ -33,16 +46,44 @@ import { PasswordResetPage } from '../password-reset/password-reset.page';
     IonHeader,
     IonTitle,
     IonToolbar,
+    IonSelectOption,
+    IonSelect,
     CommonModule,
-    FormsModule,
     PasswordResetPage,
     RouterLink,
+    FormsModule,
+    ReactiveFormsModule,
   ],
 })
 export class SignupPage implements OnInit {
+  authService = inject(AuthService);
+  availableCategories = signal<Categorie[]>([]);
   constructor() {
     addIcons({ personOutline, lockClosedOutline, chevronForward });
   }
 
-  ngOnInit() {}
+  async loadAvailableCategories() {
+    const allCategories = await this.authService.getCategories();
+    this.availableCategories.set(allCategories);
+    for (const category of allCategories) {
+      const isUsed = await this.authService.isCategoryUsed(category.value);
+      if (!isUsed) {
+        this.availableCategories.update((previousList) => [
+          ...previousList,
+          category,
+        ]);
+      }
+    }
+  }
+
+  registerForm = new FormGroup({
+    email: new FormControl(''),
+  });
+
+  onSubmit() {
+    console.log();
+  }
+  ngOnInit() {
+    this.loadAvailableCategories();
+  }
 }

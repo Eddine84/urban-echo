@@ -9,6 +9,16 @@ import {
   User,
   updateProfile,
 } from '@angular/fire/auth';
+import {
+  getFirestore,
+  getDocs,
+  collection,
+  query,
+  where,
+  setDoc,
+  doc,
+  limit,
+} from 'firebase/firestore';
 
 @Injectable({
   providedIn: 'root',
@@ -87,5 +97,24 @@ export class AuthService {
         error
       );
     }
+  }
+
+  async getCategories(): Promise<any[]> {
+    const db = getFirestore();
+    const categoriesSnapshot = await getDocs(collection(db, 'categories'));
+    const categories = categoriesSnapshot.docs.map((doc) => doc.data());
+    return categories;
+  }
+
+  async isCategoryUsed(categoryValue: string): Promise<boolean> {
+    const db = getFirestore();
+    const querySnapshot = await getDocs(
+      query(
+        collection(db, 'categories'),
+        where('text', '==', categoryValue),
+        limit(1)
+      )
+    );
+    return !querySnapshot.empty;
   }
 }
