@@ -18,6 +18,7 @@ import {
   setDoc,
   doc,
   limit,
+  deleteDoc,
 } from 'firebase/firestore';
 
 @Injectable({
@@ -99,22 +100,40 @@ export class AuthService {
     }
   }
 
-  async getCategories(): Promise<any[]> {
-    const db = getFirestore();
-    const categoriesSnapshot = await getDocs(collection(db, 'categories'));
-    const categories = categoriesSnapshot.docs.map((doc) => doc.data());
-    return categories;
-  }
+  // async getCategories(): Promise<any[]> {
+  //   const db = getFirestore();
+  //   const categoriesSnapshot = await getDocs(collection(db, 'categories'));
+  //   const categories = categoriesSnapshot.docs.map((doc) => doc.data());
+  //   return categories;
+  // }
 
-  async isCategoryUsed(categoryValue: string): Promise<boolean> {
-    const db = getFirestore();
-    const querySnapshot = await getDocs(
-      query(
-        collection(db, 'categories'),
-        where('text', '==', categoryValue),
-        limit(1)
-      )
-    );
-    return !querySnapshot.empty;
-  }
+  // async updateCategories(categoryValue: string) {
+  //   const db = getFirestore();
+  //   // Accéder à la collection où les catégories sont stockées
+  //   const categoriesCollection = collection(db, 'categories');
+
+  //   // Créer une requête pour trouver la catégorie spécifiée
+  //   const q = query(categoriesCollection, where('value', '==', categoryValue));
+
+  //   // Exécuter la requête
+  //   const querySnapshot = await getDocs(q);
+
+  //   // Parcourir les résultats de la requête (devrait normalement n'avoir qu'un seul résultat pour une clé unique)
+  //   querySnapshot.forEach(async (document) => {
+  //     // Effacer le document trouvé
+  //     await deleteDoc(doc(db, 'categories', document.id));
+  //   });
+  // }
+
+  // async isCategoryUsed(categoryValue: string): Promise<boolean> {
+  //   const db = getFirestore();
+  //   const querySnapshot = await getDocs(
+  //     query(
+  //       collection(db, 'categories'),
+  //       where('text', '==', categoryValue),
+  //       limit(1)
+  //     )
+  //   );
+  //   return !querySnapshot.empty;
+  // }
 }

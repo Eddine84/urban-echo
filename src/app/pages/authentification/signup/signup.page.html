@@ -11,11 +11,13 @@
           interface="action-sheet"
           placeholder="Selectionner votre categorie"
           class="categories"
+          formControlName="categorie"
+          name="categorie"
+          (ionChange)="handleSelectChange($event)"
+          id="present-alert"
         >
           @for(categorie of availableCategories() ; track categorie.id){
-          <ion-select-option
-            [value]="categorie.value"
-            formControlName="password"
+          <ion-select-option [value]="categorie.value"
             >{{categorie.text}}</ion-select-option
           >
           }
@@ -41,6 +43,18 @@
       />
       <ion-icon name="lock-closed-outline" class="input-icon"> </ion-icon>
     </div>
+    @if(emailIsInvalid) {
+    <div class="error-message">
+      <label class="show"> Addresse email non valide</label>
+    </div>
+    } @if(passwordIsInvalid) {
+    <div class="error-message">
+      <label class="show">
+        Mot de pass non valid et doit avoir une longeur de 8 charactere et dois
+        contenir au moin un charactere special ou un emajuscule</label
+      >
+    </div>
+    }
 
     <ion-button type="submit">register</ion-button>
     <div class="forgotPassword">

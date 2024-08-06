@@ -5,10 +5,12 @@ import {
   FormGroup,
   FormsModule,
   ReactiveFormsModule,
+  Validators,
 } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { categories } from '../../signaler/dummy_categories';
 import { Categorie } from '../../signaler/categorie.model';
+import { passwordStrengthValidator } from '../validators';
 import {
   IonContent,
   IonHeader,
@@ -21,6 +23,9 @@ import {
   IonSelectOption,
   IonSelect,
   IonButton,
+  IonAlert,
+  AlertController,
+  ToastController,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
@@ -31,12 +36,14 @@ import {
 import { PasswordResetPage } from '../password-reset/password-reset.page';
 import { getFirestore, setDoc, doc } from 'firebase/firestore';
 import { AuthService } from 'src/app/services/auth.service';
+
 @Component({
   selector: 'app-signup',
   templateUrl: './signup.page.html',
   styleUrls: ['./signup.page.scss'],
   standalone: true,
   imports: [
+    IonAlert,
     IonButton,
     IonFab,
     IonIcon,
@@ -57,33 +64,109 @@ import { AuthService } from 'src/app/services/auth.service';
 })
 export class SignupPage implements OnInit {
   authService = inject(AuthService);
-  availableCategories = signal<Categorie[]>([]);
+  availableCategories = signal<Categorie[]>(categories);
+  choosedCategorie = signal({});
+  alertController = inject(AlertController);
+  toastController = inject(ToastController);
+
   constructor() {
     addIcons({ personOutline, lockClosedOutline, chevronForward });
   }
 
-  async loadAvailableCategories() {
-    const allCategories = await this.authService.getCategories();
-    this.availableCategories.set(allCategories);
-    for (const category of allCategories) {
-      const isUsed = await this.authService.isCategoryUsed(category.value);
-      if (!isUsed) {
-        this.availableCategories.update((previousList) => [
-          ...previousList,
-          category,
-        ]);
-      }
-    }
+  get emailIsInvalid() {
+    return (
+      this.registerForm.controls.email.touched &&
+      this.registerForm.controls.email.dirty &&
+      this.registerForm.controls.email.invalid
+    );
+  }
+  get passwordIsInvalid() {
+    return (
+      this.registerForm.controls.password.touched &&
+      this.registerForm.controls.password.dirty &&
+      this.registerForm.controls.password.invalid
+    );
   }
 
   registerForm = new FormGroup({
-    email: new FormControl(''),
+    email: new FormControl('', {
+      validators: [Validators.required, Validators.email],
+    }),
+    password: new FormControl('', {
+      validators: [
+        Validators.required,
+        Validators.minLength(8),
+        passwordStrengthValidator,
+      ],
+    }),
+    categorie: new FormControl('', {
+      validators: [Validators.required],
+    }),
   });
 
-  onSubmit() {
-    console.log();
+  async onSubmit() {
+    if (this.registerForm.invalid) {
+      alert('you cant');
+      return;
+    }
+    console.log(this.registerForm);
+    const choosedCategorie = this.registerForm.value.categorie!;
   }
-  ngOnInit() {
-    this.loadAvailableCategories();
+
+  async handleSelectChange(event: any) {
+    const selectedCategorie = event.detail.value;
+
+    const alert = await this.alertController.create({
+      header: 'Confirmation',
+      message: `Enter the code to confirm the category: ${selectedCategorie}`,
+      inputs: [
+        {
+          name: 'code',
+          type: 'password',
+          placeholder: 'Enter code',
+        },
+      ],
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel',
+          handler: () => {
+            console.log('Alert canceled');
+          },
+        },
+        {
+          text: 'OK',
+          role: 'confirm',
+          handler: async (data) => {
+            console.log('this is data', data);
+            const choosenCategorie = categories.find(
+              (item) => item.uniqueCode === data.code
+            );
+            if (choosenCategorie && !choosenCategorie?.created) {
+              this.registerForm.controls.categorie.setValue(selectedCategorie);
+              console.log(selectedCategorie);
+            } else {
+              this.registerForm.controls.categorie.setValue('');
+              await this.showToast(
+                "Vous n'avez pas le droit de choisir cette catégorie."
+              );
+            }
+          },
+        },
+      ],
+    });
+
+    await alert.present();
   }
+
+  async showToast(message: string) {
+    const toast = await this.toastController.create({
+      message,
+      duration: 2000,
+      position: 'top',
+    });
+    toast.present();
+  }
+
+  ngOnInit() {}
 }
