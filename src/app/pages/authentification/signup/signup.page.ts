@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   FormControl,
@@ -26,6 +26,7 @@ import {
   IonAlert,
   AlertController,
   ToastController,
+  IonProgressBar,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
@@ -43,6 +44,7 @@ import { AuthService } from 'src/app/services/auth.service';
   styleUrls: ['./signup.page.scss'],
   standalone: true,
   imports: [
+    IonProgressBar,
     IonAlert,
     IonButton,
     IonFab,
@@ -63,14 +65,33 @@ import { AuthService } from 'src/app/services/auth.service';
   ],
 })
 export class SignupPage implements OnInit {
+  formSubmitted = false;
+  isFetching = signal(false);
   authService = inject(AuthService);
   availableCategories = signal<Categorie[]>(categories);
   choosedCategorie = signal({});
   alertController = inject(AlertController);
   toastController = inject(ToastController);
+  public progress = 0;
+  destroyRef = inject(DestroyRef);
 
   constructor() {
     addIcons({ personOutline, lockClosedOutline, chevronForward });
+    setInterval(() => {
+      this.progress += 0.01;
+
+      // Reset the progress bar when it reaches 100%
+      // to continuously show the demo
+      if (this.progress > 1) {
+        setTimeout(() => {
+          this.progress = 0;
+        }, 1000);
+      }
+    }, 50);
+
+    // this.destroyRef.onDestroy(() => {
+    //   clearInterval(intervalId);
+    // });
   }
 
   get emailIsInvalid() {
@@ -105,12 +126,28 @@ export class SignupPage implements OnInit {
   });
 
   async onSubmit() {
+    this.formSubmitted = true;
     if (this.registerForm.invalid) {
-      alert('you cant');
       return;
     }
-    console.log(this.registerForm);
-    const choosedCategorie = this.registerForm.value.categorie!;
+
+    this.isFetching.set(true);
+    try {
+      const response = await this.authService.register(
+        this.registerForm.value.email!,
+        this.registerForm.value.password!
+      );
+
+      if (response) {
+        this.isFetching.set(false);
+        await this.showToast('Success ! utilisateur crée !');
+        console.log('my response:', response);
+      }
+    } catch (error) {
+      this.isFetching.set(false);
+      console.log(error);
+      await this.showToast("Erreur lors de la creation de l'utilisateur ");
+    }
   }
 
   async handleSelectChange(event: any) {

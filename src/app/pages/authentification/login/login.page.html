@@ -2,6 +2,8 @@
   <ion-title class="title">welcome back</ion-title>
   <p class="subTitle">sign in to access your account</p>
 </div>
+@if(isFetching()){
+<ion-progress-bar [value]="progress"></ion-progress-bar>} @else{
 <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
   <div div class="ion-padding">
     <div class="input-container">
@@ -52,6 +54,7 @@
     </p>
   </div>
 </form>
+}
 <!-- // [formControl]="loginForm.controls.email" meme chose que
 formControlName="email" // si utulisation de formControlName dois binder
 [fromGroup] = "loginForm" -->

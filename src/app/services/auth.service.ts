@@ -81,8 +81,14 @@ export class AuthService {
         password
       );
       return userCredential.user;
-    } catch (error) {
-      console.error('Erreur lors de la connexion:', error);
+    } catch (error: any) {
+      if (error.code === 'auth/wrong-password') {
+        console.error('Mot de passe incorrect');
+      } else if (error.code === 'auth/user-not-found') {
+        console.error('Utilisateur non trouvé');
+      } else {
+        console.error('Erreur lors de la connexion:', error.message);
+      }
       return null;
     }
   }
@@ -99,41 +105,4 @@ export class AuthService {
       );
     }
   }
-
-  // async getCategories(): Promise<any[]> {
-  //   const db = getFirestore();
-  //   const categoriesSnapshot = await getDocs(collection(db, 'categories'));
-  //   const categories = categoriesSnapshot.docs.map((doc) => doc.data());
-  //   return categories;
-  // }
-
-  // async updateCategories(categoryValue: string) {
-  //   const db = getFirestore();
-  //   // Accéder à la collection où les catégories sont stockées
-  //   const categoriesCollection = collection(db, 'categories');
-
-  //   // Créer une requête pour trouver la catégorie spécifiée
-  //   const q = query(categoriesCollection, where('value', '==', categoryValue));
-
-  //   // Exécuter la requête
-  //   const querySnapshot = await getDocs(q);
-
-  //   // Parcourir les résultats de la requête (devrait normalement n'avoir qu'un seul résultat pour une clé unique)
-  //   querySnapshot.forEach(async (document) => {
-  //     // Effacer le document trouvé
-  //     await deleteDoc(doc(db, 'categories', document.id));
-  //   });
-  // }
-
-  // async isCategoryUsed(categoryValue: string): Promise<boolean> {
-  //   const db = getFirestore();
-  //   const querySnapshot = await getDocs(
-  //     query(
-  //       collection(db, 'categories'),
-  //       where('text', '==', categoryValue),
-  //       limit(1)
-  //     )
-  //   );
-  //   return !querySnapshot.empty;
-  // }
 }
