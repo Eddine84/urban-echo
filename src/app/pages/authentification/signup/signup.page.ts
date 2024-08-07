@@ -74,6 +74,7 @@ export class SignupPage implements OnInit {
   toastController = inject(ToastController);
   public progress = 0;
   destroyRef = inject(DestroyRef);
+  private firestore = getFirestore();
 
   constructor() {
     addIcons({ personOutline, lockClosedOutline, chevronForward });
@@ -139,14 +140,20 @@ export class SignupPage implements OnInit {
       );
 
       if (response) {
-        this.isFetching.set(false);
-        await this.showToast('Success ! utilisateur crée !');
-        console.log('my response:', response);
+        const userDocRef = doc(this.firestore, `users/${response.uid}`);
+        await setDoc(userDocRef, {
+          email: this.registerForm.value.email,
+          categorie: this.registerForm.value.categorie,
+        });
       }
+      await this.showToast('Success ! utilisateur crée !');
+      console.log('my response:', response);
     } catch (error) {
-      this.isFetching.set(false);
       console.log(error);
       await this.showToast("Erreur lors de la creation de l'utilisateur ");
+    } finally {
+      // Assurez-vous que isFetching est mis à false à la fin de la tentative, que ce soit un succès ou un échec
+      this.isFetching.set(false);
     }
   }
 

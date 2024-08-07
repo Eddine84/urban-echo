@@ -1,4 +1,5 @@
-@if(isFetching() && !error()) {
+@if(isFetching()) {
+<!-- Chargement en cours -->
 <ion-card>
   <div
     style="
@@ -9,10 +10,11 @@
       align-items: center;
     "
   >
-    <h1 style="text-align: center">chargement des signalement en cours...</h1>
+    <h1 style="text-align: center">Chargement des signalements en cours...</h1>
   </div>
 </ion-card>
-} @if( error()) {
+} @else if(error()) {
+<!-- Erreur lors du chargement -->
 <ion-card>
   <div
     style="
@@ -24,11 +26,26 @@
     "
   >
     <h1 style="text-align: center">
-      une erreur s'est produite , veuillez réesayer plus tard... {{ error() }}
+      Une erreur s'est produite, veuillez réessayer plus tard... {{ error() }}
     </h1>
   </div>
 </ion-card>
-} @if(signalements()){
+} @else if(signalements()?.length === 0) {
+<!-- Aucun signalement à afficher -->
+<ion-card>
+  <div
+    style="
+      height: 100vh;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    "
+  >
+    <h1 style="text-align: center">Aucun signalement à afficher</h1>
+  </div>
+</ion-card>
+} @else{
 
 <app-signalement-large [signalementFenetre]="selectedSignalement()" />
 
@@ -36,13 +53,13 @@
   <ion-select
     aria-label="Recherches"
     interface="action-sheet"
-    placeholder="Filter signalements"
+    placeholder="Filtrer les signalements"
     (ionChange)="onChangeSignalementsFilter(filter.value)"
     #filter
   >
-    <ion-select-option value="all">All</ion-select-option>
-    <ion-select-option value="inProgress">Status: En cours</ion-select-option>
-    <ion-select-option value="resolved">Status: Résolus</ion-select-option>
+    <ion-select-option value="all">Tous</ion-select-option>
+    <ion-select-option value="inProgress">Statut: En cours</ion-select-option>
+    <ion-select-option value="resolved">Statut: Résolus</ion-select-option>
     <ion-select-option value="mostConfirmed"
       >Le plus confirmés</ion-select-option
     >
@@ -59,13 +76,7 @@
       [selected]="selectedSignalement().id === signalement.id"
     /> </ion-list
   >}@empty {
-  <p>aucune signalement pour le moment....</p>
+  <p>Aucun signalement pour le moment...</p>
   }
-  <!-- <ion-infinite-scroll>
-    <ion-infinite-scroll-content
-      loadingText="Please wait..."
-      loadingSpinner="bubbles"
-    ></ion-infinite-scroll-content>
-  </ion-infinite-scroll> -->
 </ion-content>
 }

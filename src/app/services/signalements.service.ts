@@ -3,25 +3,31 @@ import {
   SignalStatus,
   type Signalemenent,
 } from '../pages/signalements/signalement.model';
-import { Observable } from 'rxjs';
+import { Observable, from, of, switchMap } from 'rxjs';
 import {
   Firestore,
   collection,
   collectionData,
   docData,
 } from '@angular/fire/firestore';
-import { addDoc, deleteDoc, doc, getDoc, setDoc } from 'firebase/firestore';
+import {
+  addDoc,
+  deleteDoc,
+  doc,
+  getDoc,
+  getDocs,
+  getFirestore,
+  query,
+  setDoc,
+  where,
+} from 'firebase/firestore';
 
 @Injectable({ providedIn: 'root' })
 export class SignalementsService {
   private firestore = inject(Firestore);
   private destroRef = inject(DestroyRef);
-
+  db = getFirestore();
   userId = signal('');
-
-  loadSignalements() {
-    return this.fetchSignalements();
-  }
 
   async addSignalement(signalement: Signalemenent): Promise<void> {
     const signalementsCollection = collection(this.firestore, 'signalements');
@@ -105,14 +111,61 @@ export class SignalementsService {
       throw new Error('No such document!');
     }
   }
+  private fetchSignalements(): Observable<Signalemenent[]> {
+    // Rechercher la clé appropriée dans le local storage
+    const keys = Object.keys(localStorage);
+    const authUserKey = keys.find((key) =>
+      key.startsWith('firebase:authUser:')
+    );
+    if (!authUserKey) {
+      throw new Error('Utilisateur non trouvé dans le local storage.');
+    }
 
-  private fetchSignalements() {
+    const userData = localStorage.getItem(authUserKey);
+    console.log('test userdata :', userData);
+    if (!userData) {
+      throw new Error('Utilisateur non trouvé dans le local storage.');
+    }
+
+    const user = JSON.parse(userData);
+    const isAnonymous = user.isAnonymous;
+
     const signalementsCollection = collection(this.firestore, 'signalements');
-    return collectionData(signalementsCollection, {
-      idField: 'id',
-    }) as Observable<Signalemenent[]>;
-  }
 
+    if (isAnonymous) {
+      // Utilisateur anonyme : récupérer tous les signalements
+      return collectionData(signalementsCollection, {
+        idField: 'id',
+      }) as Observable<Signalemenent[]>;
+    } else {
+      // Utilisateur authentifié : récupérer les signalements spécifiques à la catégorie de l'utilisateur
+      const usersDocRef = doc(this.firestore, 'users', user.uid);
+
+      return from(getDoc(usersDocRef)).pipe(
+        switchMap((userSnapshot) => {
+          if (userSnapshot.exists()) {
+            const userData = userSnapshot.data();
+            const userCategory = userData['categorie'];
+            console.log('userData', userData);
+            console.log('userCategory', userCategory);
+            const categoryQuery = query(
+              signalementsCollection,
+              where('recipient', 'array-contains', userCategory)
+            );
+            return collectionData(categoryQuery, {
+              idField: 'id',
+            }) as Observable<Signalemenent[]>;
+          } else {
+            console.error('Utilisateur non trouvé dans la collection users.');
+            return of([]);
+          }
+        })
+      );
+    }
+  }
+  loadSignalements(): Observable<Signalemenent[]> {
+    return this.fetchSignalements();
+  }
   getSignalementById(id: string): Observable<Signalemenent | undefined> {
     const signalementDoc = doc(this.firestore, `signalements/${id}`);
     return docData(signalementDoc, { idField: 'id' }) as Observable<

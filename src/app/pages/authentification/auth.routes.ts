@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { ProfileComponent } from '../profile/profile.component';
+
 export const routes: Routes = [
   {
     path: '',
@@ -22,9 +22,5 @@ export const routes: Routes = [
       import('./password-reset/password-reset.page').then(
         (m) => m.PasswordResetPage
       ),
-  },
-  {
-    path: 'profile',
-    component: ProfileComponent,
   },
 ];

@@ -5,6 +5,7 @@ import { SignalerComponent } from './pages/signaler/signaler.component';
 import { AuthentificationComponent } from './pages/authentification/authentification.component';
 import { routes as authRoutes } from './pages/authentification/auth.routes';
 import { NotFoundComponent } from './pages/not-found/not-found.component';
+import { ProfileComponent } from './pages/profile/profile.component';
 export const routes: Routes = [
   {
     path: '',
@@ -24,6 +25,10 @@ export const routes: Routes = [
     path: 'auth',
     component: AuthentificationComponent,
     children: authRoutes,
+  },
+  {
+    path: 'profile',
+    component: ProfileComponent,
   },
   {
     path: '**',

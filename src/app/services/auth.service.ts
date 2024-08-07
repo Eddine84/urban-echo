@@ -7,19 +7,7 @@ import {
   sendPasswordResetEmail,
   browserLocalPersistence,
   User,
-  updateProfile,
 } from '@angular/fire/auth';
-import {
-  getFirestore,
-  getDocs,
-  collection,
-  query,
-  where,
-  setDoc,
-  doc,
-  limit,
-  deleteDoc,
-} from 'firebase/firestore';
 
 @Injectable({
   providedIn: 'root',
@@ -104,5 +92,17 @@ export class AuthService {
         error
       );
     }
+  }
+  // Fonction pour récupérer les informations de l'utilisateur depuis le local storage
+  getUserFromLocalStorage(): User | null {
+    const keys = Object.keys(localStorage);
+    const authUserKey = keys.find((key) =>
+      key.startsWith('firebase:authUser:')
+    );
+    if (authUserKey) {
+      const user = localStorage.getItem(authUserKey);
+      return user ? JSON.parse(user) : null;
+    }
+    return null;
   }
 }

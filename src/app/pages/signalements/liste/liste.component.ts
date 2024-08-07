@@ -112,7 +112,8 @@ export class ListeComponent implements OnInit {
         },
         error: (error) => {
           console.log(error);
-          this.error.set('chargement des signalement en cours...');
+          this.error.set('erreur lors du chargement des signalement');
+          this.isFetching.set(false);
         },
       });
     this.destroyRef.onDestroy(() => {

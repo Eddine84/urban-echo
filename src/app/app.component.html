@@ -3,13 +3,20 @@
     <ion-router-outlet></ion-router-outlet>
     <ion-tabs>
       <ion-tab-bar slot="bottom">
-        <ion-tab-button routerLink="/auth" routerLinkActive="active-tab">
-          <ion-icon name="person-outline"></ion-icon>
-          profile
-        </ion-tab-button>
+        @if(userType()){
         <ion-tab-button routerLink="/signaler" routerLinkActive="active-tab">
           <ion-icon name="add-outline"></ion-icon>
           signaler
+        </ion-tab-button>
+        <ion-tab-button routerLink="/auth" routerLinkActive="active-tab">
+          <ion-icon name="person-outline"></ion-icon>
+          login
+        </ion-tab-button>
+
+        }
+        <ion-tab-button routerLink="/profile" routerLinkActive="active-tab">
+          <ion-icon name="id-card-outline"></ion-icon>
+          mon espace
         </ion-tab-button>
         <ion-tab-button
           routerLink="/signalements"

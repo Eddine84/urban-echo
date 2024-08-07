@@ -23,6 +23,7 @@ import {
   search,
   personOutline,
   listOutline,
+  idCardOutline,
 } from 'ionicons/icons';
 import { register } from 'swiper/element/bundle';
 import { SignalementsService } from './services/signalements.service';
@@ -59,20 +60,23 @@ export class AppComponent implements OnInit {
       search,
       personOutline,
       listOutline,
+      idCardOutline,
     });
   }
 
   authService = inject(AuthService);
   signalementsService = inject(SignalementsService);
-
-  ngOnInit(): void {
-    this.authService.signInAnonymously().then((user) => {
-      if (user) {
-        console.log('Utilisateur anonyme connecté:', user);
-        this.signalementsService.userId.set(user.uid);
-      } else {
-        console.log('Échec de la connexion anonyme.');
-      }
-    });
+  userType = signal<boolean | undefined>(false);
+  async ngOnInit() {
+    const user = this.authService.getUserFromLocalStorage();
+    if (!user) {
+      this.fetchUser();
+    }
+  }
+  async fetchUser() {
+    // ca va utiliser le service pour creer une authentification anonynme et stocker dans local storage
+    const userResponse = await this.authService.signInAnonymously();
+    console.log('this is:', userResponse);
+    this.userType.set(userResponse?.isAnonymous);
   }
 }
