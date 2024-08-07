@@ -58,7 +58,7 @@ export class ListeComponent implements OnInit {
   allSignalements = signal<Signalemenent[] | undefined>(undefined);
   isFetching = signal(false);
   error = signal('');
-
+  //je regarde la video pour mettre dans une service
   signalements = computed(() => {
     switch (this.selectedFilter()) {
       case 'inProgress':

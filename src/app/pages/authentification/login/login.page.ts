@@ -19,7 +19,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { passwordStrengthValidator } from '../validators';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import {
   IonContent,
   IonHeader,
@@ -76,6 +76,7 @@ export class LoginPage implements OnInit {
   formSubmitted = false;
   isFetching = signal(false);
   toastController = inject(ToastController);
+  router = inject(Router);
   constructor() {
     addIcons({ personOutline, lockClosedOutline, chevronForward });
     setInterval(() => {
@@ -155,7 +156,7 @@ export class LoginPage implements OnInit {
       if (user) {
         this.isFetching.set(false);
         console.log('User logged in successfully:', user);
-        // Redirigez l'utilisateur ou effectuez d'autres actions nécessaires
+        this.router.navigate(['/signalements/liste']);
       } else {
         this.isFetching.set(false);
         console.error(

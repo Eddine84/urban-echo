@@ -1,4 +1,10 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  inject,
+  signal,
+  ChangeDetectorRef,
+} from '@angular/core';
 import {
   IonApp,
   IonRouterOutlet,
@@ -27,6 +33,7 @@ import {
 } from 'ionicons/icons';
 import { register } from 'swiper/element/bundle';
 import { SignalementsService } from './services/signalements.service';
+import { User } from 'firebase/auth';
 register();
 
 @Component({
@@ -66,17 +73,28 @@ export class AppComponent implements OnInit {
 
   authService = inject(AuthService);
   signalementsService = inject(SignalementsService);
-  userType = signal<boolean | undefined>(false);
-  async ngOnInit() {
-    const user = this.authService.getUserFromLocalStorage();
-    if (!user) {
+  user = this.authService.userSignal;
+
+  ngOnInit() {
+    const localUser = this.authService.getUserFromLocalStorage();
+
+    if (localUser) {
+      this.authService.userSignal.set(localUser);
+    } else {
       this.fetchUser();
     }
   }
   async fetchUser() {
     // ca va utiliser le service pour creer une authentification anonynme et stocker dans local storage
-    const userResponse = await this.authService.signInAnonymously();
-    console.log('this is:', userResponse);
-    this.userType.set(userResponse?.isAnonymous);
+
+    try {
+      const userResponse = await this.authService.signInAnonymously();
+      if (userResponse) {
+        console.log('je suis la');
+        this.authService.userSignal.set(userResponse);
+      }
+    } catch (error) {
+      console.log(error);
+    }
   }
 }

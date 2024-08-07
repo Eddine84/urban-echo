@@ -21,13 +21,22 @@ import {
   setDoc,
   where,
 } from 'firebase/firestore';
+import { AuthService } from './auth.service';
 
 @Injectable({ providedIn: 'root' })
 export class SignalementsService {
+  detectChanges() {
+    throw new Error('Method not implemented.');
+  }
   private firestore = inject(Firestore);
   private destroRef = inject(DestroyRef);
+  authService = inject(AuthService);
   db = getFirestore();
   userId = signal('');
+  signalementsSignal = signal<Signalemenent[]>([]);
+  get signalements() {
+    return this.signalementsSignal.asReadonly();
+  }
 
   async addSignalement(signalement: Signalemenent): Promise<void> {
     const signalementsCollection = collection(this.firestore, 'signalements');
@@ -112,23 +121,8 @@ export class SignalementsService {
     }
   }
   private fetchSignalements(): Observable<Signalemenent[]> {
-    // Rechercher la clé appropriée dans le local storage
-    const keys = Object.keys(localStorage);
-    const authUserKey = keys.find((key) =>
-      key.startsWith('firebase:authUser:')
-    );
-    if (!authUserKey) {
-      throw new Error('Utilisateur non trouvé dans le local storage.');
-    }
-
-    const userData = localStorage.getItem(authUserKey);
-    console.log('test userdata :', userData);
-    if (!userData) {
-      throw new Error('Utilisateur non trouvé dans le local storage.');
-    }
-
-    const user = JSON.parse(userData);
-    const isAnonymous = user.isAnonymous;
+    const user = this.authService.userSignal;
+    const isAnonymous = user()?.isAnonymous;
 
     const signalementsCollection = collection(this.firestore, 'signalements');
 
@@ -139,7 +133,7 @@ export class SignalementsService {
       }) as Observable<Signalemenent[]>;
     } else {
       // Utilisateur authentifié : récupérer les signalements spécifiques à la catégorie de l'utilisateur
-      const usersDocRef = doc(this.firestore, 'users', user.uid);
+      const usersDocRef = doc(this.firestore, 'users', user()?.uid!);
 
       return from(getDoc(usersDocRef)).pipe(
         switchMap((userSnapshot) => {

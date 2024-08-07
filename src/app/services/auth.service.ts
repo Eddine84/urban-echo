@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import {
   Auth,
   signInAnonymously,
@@ -8,6 +8,7 @@ import {
   browserLocalPersistence,
   User,
 } from '@angular/fire/auth';
+import { signOut } from 'firebase/auth';
 
 @Injectable({
   providedIn: 'root',
@@ -28,12 +29,18 @@ export class AuthService {
         );
       });
   }
+  userSignal = signal<User | null>(null);
+  get user() {
+    return this.userSignal.asReadonly();
+  }
 
   // Fonction pour se connecter anonymement
   async signInAnonymously(): Promise<User | null> {
     try {
       const userCredential = await signInAnonymously(this.auth);
-      return userCredential.user;
+      const user = userCredential.user;
+      this.userSignal.set(user);
+      return user;
     } catch (error) {
       console.error('Erreur lors de la connexion anonyme:', error);
       return null;
@@ -53,7 +60,9 @@ export class AuthService {
         email,
         password
       );
-      return userCredential.user;
+      const user = userCredential.user;
+      this.userSignal.set(user);
+      return user;
     } catch (error) {
       console.error("Erreur lors de l'inscription:", error);
       return null;
@@ -68,7 +77,9 @@ export class AuthService {
         email,
         password
       );
-      return userCredential.user;
+      const user = userCredential.user;
+      this.userSignal.set(user);
+      return user;
     } catch (error: any) {
       if (error.code === 'auth/wrong-password') {
         console.error('Mot de passe incorrect');
@@ -80,8 +91,12 @@ export class AuthService {
       return null;
     }
   }
+  async logout(): Promise<void> {
+    await signOut(this.auth);
+    this.userSignal.set(null);
+    await this.signInAnonymously();
+  }
 
-  // Fonction pour envoyer un email de réinitialisation de mot de passe
   async resetPassword(email: string): Promise<void> {
     try {
       await sendPasswordResetEmail(this.auth, email);
@@ -93,7 +108,7 @@ export class AuthService {
       );
     }
   }
-  // Fonction pour récupérer les informations de l'utilisateur depuis le local storage
+
   getUserFromLocalStorage(): User | null {
     const keys = Object.keys(localStorage);
     const authUserKey = keys.find((key) =>
@@ -101,7 +116,11 @@ export class AuthService {
     );
     if (authUserKey) {
       const user = localStorage.getItem(authUserKey);
-      return user ? JSON.parse(user) : null;
+      if (user) {
+        const userData: User = JSON.parse(user);
+        this.userSignal.set(userData);
+        return userData;
+      }
     }
     return null;
   }

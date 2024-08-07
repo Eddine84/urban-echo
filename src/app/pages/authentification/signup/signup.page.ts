@@ -7,7 +7,7 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { categories } from '../../signaler/dummy_categories';
 import { Categorie } from '../../signaler/categorie.model';
 import { passwordStrengthValidator } from '../validators';
@@ -75,7 +75,7 @@ export class SignupPage implements OnInit {
   public progress = 0;
   destroyRef = inject(DestroyRef);
   private firestore = getFirestore();
-
+  router = inject(Router);
   constructor() {
     addIcons({ personOutline, lockClosedOutline, chevronForward });
     setInterval(() => {
@@ -148,6 +148,7 @@ export class SignupPage implements OnInit {
       }
       await this.showToast('Success ! utilisateur crée !');
       console.log('my response:', response);
+      this.router.navigate(['/']);
     } catch (error) {
       console.log(error);
       await this.showToast("Erreur lors de la creation de l'utilisateur ");
