@@ -155,6 +155,11 @@
             </ion-col>
           </ng-container>
         </ion-row>
+        @if(photosAreInvalid) {
+        <div class="error-message">
+          <label class="show"> veuillez fournir au moins une photo </label>
+        </div>
+        }
       </ion-grid>
     </ion-item>
 

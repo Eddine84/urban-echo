@@ -131,6 +131,7 @@ export class SignalerComponent {
     ]),
     address: new FormControl('', [Validators.required]),
     selectedType: new FormControl('', [Validators.required]),
+    photos: new FormArray([], [Validators.required]),
   });
 
   get Alladresses() {
@@ -163,6 +164,9 @@ export class SignalerComponent {
   constructor() {
     addIcons({ closeCircle, camera, send, locateOutline, pin });
   }
+  get photos(): FormArray {
+    return this.signalementForm.get('photos') as FormArray;
+  }
 
   private formatData(data: string[]) {
     if (data.length === 1) {
@@ -186,6 +190,11 @@ export class SignalerComponent {
 
   async addPhoto() {
     await this.photoService.addNewToGallery();
+    const photoControl = new FormControl(
+      this.photoService.photos[this.photoService.photos.length - 1].webviewPath,
+      Validators.required
+    );
+    this.photos.push(photoControl);
   }
 
   removePhoto(index: number) {
@@ -257,9 +266,10 @@ export class SignalerComponent {
       title: this.signalementForm.value.title!,
       location: this.signalementForm.value.address!,
       date: new Date().toISOString(),
-      images: this.photoService.photos
-        .map((photo) => photo.webviewPath)
-        .filter((path): path is string => path !== undefined),
+      images: this.signalementForm.value.photos!,
+      // images: this.photoService.photos
+      //   .map((photo) => photo.webviewPath)
+      //   .filter((path): path is string => path !== undefined),
       content: this.signalementForm.value.content!,
       coordinates: this.signalementPosition,
       category: this.signalementForm.value.selectedType!,
@@ -282,5 +292,8 @@ export class SignalerComponent {
     this.selectedDestinataires.set([]);
     this.destinatairesSelections = 'aucun';
     this.photoService.photos = [];
+  }
+  get photosAreInvalid() {
+    return this.formSubmitted && this.photos.controls.length === 0;
   }
 }

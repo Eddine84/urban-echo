@@ -80,7 +80,8 @@ export class SignalementsService {
         signalementData.id === id &&
         signalementData.recipient.some((element) =>
           destinataire.includes(element)
-        )
+        ) &&
+        !this.authService.userSignal()?.isAnonymous
       ) {
         await deleteDoc(signalementDocRef);
         console.log('Document successfully deleted!');
@@ -112,7 +113,8 @@ export class SignalementsService {
         signalementData.id === selectedSignalementId &&
         signalementData.recipient.some((element) =>
           destinataire.includes(element)
-        )
+        ) &&
+        !this.authService.userSignal()?.isAnonymous
       ) {
         signalementData.status = 'Résolu';
         await setDoc(signalementDocRef, signalementData);
