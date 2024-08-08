@@ -55,11 +55,14 @@ export class ListeComponent implements OnInit {
   destroyRef = inject(DestroyRef);
   signalementsService = inject(SignalementsService);
   selectedFilter = signal('all');
-  allSignalements = signal<Signalemenent[] | undefined>(undefined);
+  allSignalements = this.signalementsService.signalementsSignal;
   isFetching = signal(false);
   error = signal('');
-  //je regarde la video pour mettre dans une service
+  selectedSignalement = signal<any>({});
+
+  // Calculé les signalements en fonction du filtre sélectionné
   signalements = computed(() => {
+    console.log('Calculating filtered signalements');
     switch (this.selectedFilter()) {
       case 'inProgress':
         return this.allSignalements()!.filter(
@@ -85,7 +88,6 @@ export class ListeComponent implements OnInit {
         return this.allSignalements();
     }
   });
-  selectedSignalement = signal<any>({});
 
   onSelect(id: string) {
     this.selectedSignalement.set(
@@ -97,27 +99,33 @@ export class ListeComponent implements OnInit {
     this.selectedFilter.set(filter);
   }
 
-  //signalementts$?: Observable<Signalemenent[]>;
   ngOnInit() {
-    this.isFetching.set(true);
-    const loadSignalementsSubsciption = this.signalementsService
-      .loadSignalements()
+    console.log('ngOnInit called');
 
+    this.isFetching.set(true);
+    const loadSignalementsSubscription = this.signalementsService
+      .loadSignalements()
       .subscribe({
         next: (data) => {
-          this.allSignalements.set(data);
+          console.log('Data loaded', data);
+          this.signalementsService.signalementsSignal.set(data);
           this.isFetching.set(false);
-          console.log(data);
-          this.selectedSignalement = signal<Signalemenent>(data[0]);
+          console.log('test 2');
+          this.selectedSignalement.set(data[0]);
         },
         error: (error) => {
-          console.log(error);
+          console.log('Error loading data', error);
           this.error.set('erreur lors du chargement des signalement');
           this.isFetching.set(false);
         },
       });
+
     this.destroyRef.onDestroy(() => {
-      loadSignalementsSubsciption.unsubscribe();
+      loadSignalementsSubscription.unsubscribe();
     });
+  }
+
+  constructor() {
+    console.log('constructor called');
   }
 }

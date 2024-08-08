@@ -65,6 +65,7 @@ import { AuthService } from 'src/app/services/auth.service';
   ],
 })
 export class SignupPage implements OnInit {
+  router = inject(Router);
   formSubmitted = false;
   isFetching = signal(false);
   authService = inject(AuthService);
@@ -75,7 +76,7 @@ export class SignupPage implements OnInit {
   public progress = 0;
   destroyRef = inject(DestroyRef);
   private firestore = getFirestore();
-  router = inject(Router);
+
   constructor() {
     addIcons({ personOutline, lockClosedOutline, chevronForward });
     setInterval(() => {
@@ -145,13 +146,13 @@ export class SignupPage implements OnInit {
           email: this.registerForm.value.email,
           categorie: this.registerForm.value.categorie,
         });
+        await this.showToast('Success ! utilisateur crée !');
+        this.router.navigate(['/signalements/liste']);
+        console.log('my response:', response);
       }
-      await this.showToast('Success ! utilisateur crée !');
-      console.log('my response:', response);
-      this.router.navigate(['/']);
     } catch (error) {
       console.log(error);
-      await this.showToast("Erreur lors de la creation de l'utilisateur ");
+      await this.showToast("L'utilisateur existe déjà.");
     } finally {
       // Assurez-vous que isFetching est mis à false à la fin de la tentative, que ce soit un succès ou un échec
       this.isFetching.set(false);

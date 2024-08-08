@@ -79,7 +79,6 @@ export class AppComponent implements OnInit {
     const localUser = this.authService.getUserFromLocalStorage();
 
     if (localUser) {
-      this.authService.userSignal.set(localUser);
     } else {
       this.fetchUser();
     }

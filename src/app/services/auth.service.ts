@@ -7,6 +7,7 @@ import {
   sendPasswordResetEmail,
   browserLocalPersistence,
   User,
+  fetchSignInMethodsForEmail,
 } from '@angular/fire/auth';
 import { signOut } from 'firebase/auth';
 
@@ -64,8 +65,7 @@ export class AuthService {
       this.userSignal.set(user);
       return user;
     } catch (error) {
-      console.error("Erreur lors de l'inscription:", error);
-      return null;
+      throw error;
     }
   }
 
@@ -106,6 +106,7 @@ export class AuthService {
         "Erreur lors de l'envoi de l'email de réinitialisation de mot de passe:",
         error
       );
+      throw error;
     }
   }
 
@@ -123,5 +124,16 @@ export class AuthService {
       }
     }
     return null;
+  }
+
+  // Fonction pour vérifier si un utilisateur existe via son email
+  async checkIfUserExists(email: string): Promise<boolean> {
+    try {
+      const signInMethods = await fetchSignInMethodsForEmail(this.auth, email);
+      return signInMethods.length > 0;
+    } catch (error) {
+      console.error("Erreur lors de la vérification de l'utilisateur:", error);
+      return false;
+    }
   }
 }
