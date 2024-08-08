@@ -5,19 +5,37 @@
 </ion-header>
 
 <ion-content class="formulaire">
-  <form (ngSubmit)="onFormSubmit()" #form>
+  <form [formGroup]="signalementForm" (ngSubmit)="onFormSubmit()">
     <ion-item>
       <ion-label position="floating">Titre</ion-label>
       <ion-input
-        name="title"
+        formControlName="title"
         placeholder="Comportement raciste d'un vendeur"
-        [(ngModel)]="entredTitle"
       ></ion-input>
     </ion-item>
+    @if(titlesInvalid) {
+    <div class="error-message">
+      <label class="show">
+        veuillez fournir le titre de votre signalement</label
+      >
+    </div>
+    }
     <ion-item>
       <ion-label position="floating">Contenu</ion-label>
-      <ion-textarea name="content" [(ngModel)]="content"></ion-textarea>
+      <ion-textarea
+        placeholder="Enter text, leave the textarea, come back, and type to clear"
+        [clearOnEdit]="true"
+        formControlName="content"
+      ></ion-textarea>
     </ion-item>
+    @if(contentIsInvalid) {
+    <div class="error-message">
+      <label class="show">
+        veuillez fournir la description de votre signalement maximum 100
+        chcacteres</label
+      >
+    </div>
+    }
 
     <ion-grid>
       <ion-row>
@@ -26,8 +44,9 @@
             <ion-searchbar
               debounce="500"
               (ionInput)="search($event)"
-              [value]="selectedAdresse()"
+              [value]="signalementForm.controls['address'].value"
               style="width: 95%; position: relative"
+              formControlName="address"
             >
             </ion-searchbar>
             <ion-button
@@ -42,30 +61,27 @@
               ></ion-icon>
             </ion-button>
             <div
-              style="
-                position: absolute;
-                top: 100%;
-
-                width: 100%;
-                z-index: 999;
-              "
+              style="position: absolute; top: 100%; width: 100%; z-index: 999"
             >
-              @if(Alladresses.length > 0){
-
-              <ion-list lines="none">
-                @for(address of Alladresses; track address){
-
-                <ion-item button (click)="onSelect(address)">
+              <ion-list lines="none" *ngIf="Alladresses.length > 0">
+                <ion-item
+                  *ngFor="let address of Alladresses"
+                  button
+                  (click)="onSelect(address)"
+                >
                   <ion-icon name="pin"></ion-icon>
-                  <p>
-                    {{ address }}
-                  </p>
+                  <p>{{ address }}</p>
                 </ion-item>
-                }
               </ion-list>
-              }
             </div>
           </div>
+          @if(addressIsInvalid) {
+          <div class="error-message">
+            <label class="show">
+              veuillez fournir une address du lieu de signalement</label
+            >
+          </div>
+          }
         </ion-col>
       </ion-row>
     </ion-grid>
@@ -73,7 +89,7 @@
     <ion-item>
       <ion-select
         placeholder="Choisir Type de Signalement"
-        [(ngModel)]="selectedType"
+        formControlName="selectedType"
         name="typeSignalement"
         interface="action-sheet"
       >
@@ -85,10 +101,20 @@
         </ion-select-option>
       </ion-select>
     </ion-item>
+    @if(selectedTypeIsInvalid) {
+    <div class="error-message">
+      <label class="show"> veuillez choisir le type de signalement</label>
+    </div>
+    }
 
     <ion-item button="true" detail="false" id="select-destinataires">
       <ion-label>Destinataires</ion-label>
-      <div slot="end" id="Destinataires">{{ destinatairesSelections }}</div>
+      <!-- @for(selection of destinatairesSelections ; track selection){
+      <input type="text" [name]="selection" [formControlName]="selection" />
+      } -->
+      <div slot="end" id="Destinataires" name="recipient">
+        {{ destinatairesSelections }}
+      </div>
     </ion-item>
 
     <ion-modal trigger="select-destinataires" #modal>
@@ -97,12 +123,19 @@
           class="ion-page"
           title="Destinataires"
           [items]="categories"
-          [selectedItems]="selectedDestinataires"
+          [selectedItems]="selectedDestinataires()"
           (selectionChange)="DestinatairesSelectionChanged($event)"
           (selectionCancel)="modal.dismiss()"
         ></app-typehead>
       </ng-template>
     </ion-modal>
+    @if(recipientTypeIsInvalid) {
+    <div class="error-message">
+      <label class="show">
+        veuillez choisir le destinataire du signalement</label
+      >
+    </div>
+    }
 
     <ion-item>
       <ion-grid>
@@ -132,123 +165,10 @@
         </ion-fab-button>
       </ion-fab>
       <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-        <ion-fab-button (click)="onFormSubmit()">
+        <ion-button type="submit">
           <ion-icon name="send"></ion-icon>
-        </ion-fab-button>
+        </ion-button>
       </ion-fab>
     </div>
   </form>
 </ion-content>
-
-<!-- 
-
-<ion-header>
-  <ion-toolbar>
-    <ion-title>Ajouter Signalement</ion-title>
-  </ion-toolbar>
-</ion-header>
-
-<ion-content>
-  <form (ngSubmit)="onFormSubmit()">
-    <ion-item>
-      <ion-label position="floating">Titre</ion-label>
-      <ion-input
-        name="title"
-        placeholder="Comportement raciste d'un vendeur"
-        [(ngModel)]="entredTitle"
-      ></ion-input>
-    </ion-item>
-    <ion-item>
-      <ion-label position="floating">Contenu</ion-label>
-      <ion-textarea name="content" [(ngModel)]="content"></ion-textarea>
-    </ion-item>
-    <ion-item>
-      <ion-label position="floating">Adresse</ion-label>
-      <ion-input name="addresse" [(ngModel)]="addresse"></ion-input>
-    </ion-item>
-
-    <ion-item>
-      <ion-select
-        placeholder="Choisir Type de Signalement"
-        [(ngModel)]="selectedType"
-        name="typeSignalement"
-        interface="action-sheet"
-      >
-        <ion-select-option value="comportement" name="comportement">
-          Comportement
-        </ion-select-option>
-        <ion-select-option value="incident" name="incident">
-          Incident
-        </ion-select-option>
-      </ion-select>
-    </ion-item>
-
-    <ion-item button="true" detail="false" id="select-destinataires">
-      <ion-label>Destinataires</ion-label>
-      <div slot="end" id="Destinataires">{{ destinatairesSelections }}</div>
-    </ion-item>
-
-    <ion-modal trigger="select-destinataires" #modal>
-      <ng-template>
-        <app-typehead
-          class="ion-page"
-          title="Destinataires"
-          [items]="categories"
-          [selectedItems]="selectedDestinataires"
-          (selectionChange)="fruitSelectionChanged($event)"
-          (selectionCancel)="modal.dismiss()"
-        ></app-typehead>
-      </ng-template>
-    </ion-modal>
-
-    <ion-list> -->
-<!-- <ion-item>
-        <ion-label position="stacked">Photos</ion-label>
-        <div>
-          <ion-button (click)="addPhoto()">Ajouter Photo</ion-button>
-        </div>
-      </ion-item> -->
-<!-- <div style="display: flex"> -->
-<!-- <ng-container *ngFor="let photo of photos; let index = index">
-          <ion-item style="border: solid 1px red">
-            <ion-thumbnail slot="start">
-              <ion-img [src]="photo"></ion-img>
-            </ion-thumbnail>
-            <ion-button (click)="removePhoto(index)">
-              <ion-icon
-                slot="icon-only"
-                name="close-circle"
-                shape="circle"
-              ></ion-icon>
-            </ion-button>
-          </ion-item>
-        </ng-container> -->
-<!-- <ion-grid>
-          <ion-row>
-            <ion-col
-              size="6"
-              *ngFor="let photo of photoService.photos; index as position"
-            >
-              <ion-img [src]="photo.webviewPath"></ion-img>
-            </ion-col>
-          </ion-row>
-        </ion-grid>
-        <ion-fab vertical="bottom" horizontal="center" slot="fixed">
-          <ion-fab-button (click)="addPhoto()">
-            <ion-icon name="camera"></ion-icon>
-          </ion-fab-button>
-        </ion-fab> -->
-<!-- </div> -->
-<!-- </ion-list>
-    <ion-item>
-      <ion-button> Utiliser ma position actuelle </ion-button>
-    </ion-item>
-    <ion-item>
-      <ion-label>Latitude: </ion-label>
-    </ion-item>
-    <ion-item>
-      <ion-label>Longitude: </ion-label>
-    </ion-item>
-    <ion-button expand="full" type="submit">Signaler</ion-button>
-  </form>
-</ion-content> -->

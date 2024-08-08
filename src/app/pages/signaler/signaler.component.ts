@@ -6,7 +6,15 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import {
+  FormControl,
+  FormGroup,
+  Validators,
+  ReactiveFormsModule,
+  FormsModule,
+  AbstractControl,
+  FormArray,
+} from '@angular/forms';
 import { categories } from './dummy_categories';
 import { PhotoService } from 'src/app/services/photo.service';
 import { CommonModule } from '@angular/common';
@@ -52,6 +60,16 @@ import {
 import { MapboxService } from 'src/app/services/mapbox.service';
 import { SignalementsService } from 'src/app/services/signalements.service';
 import { Signalemenent } from '../signalements/signalement.model';
+
+export function atLeastOneRecipientSelected(
+  control: AbstractControl
+): { [key: string]: boolean } | null {
+  if (control.value && control.value.length > 0) {
+    return null;
+  }
+  return { required: true };
+}
+
 @Component({
   selector: 'app-signaler',
   templateUrl: './signaler.component.html',
@@ -84,37 +102,67 @@ import { Signalemenent } from '../signalements/signalement.model';
     IonModal,
     TypeheadComponent,
     CommonModule,
+    ReactiveFormsModule,
+    FormsModule,
   ],
 })
 export class SignalerComponent {
-  constructor() {
-    addIcons({ closeCircle, camera, send, locateOutline, pin });
-  }
   signalementsService = inject(SignalementsService);
   router = inject(Router);
   public photoService = inject(PhotoService);
   public locationService = inject(LocationService);
   public mapboxService = inject(MapboxService);
   private destroyRef = inject(DestroyRef);
-
+  formSubmitted = false;
   @ViewChild('modal', { static: true }) modal!: IonModal;
   @ViewChild('form') form?: ElementRef<HTMLFormElement>;
   categories: Categorie[] = categories;
   destinatairesSelections = 'aucun';
-  selectedDestinataires: string[] = [];
-
-  get Alladresses() {
-    return this.mapboxService.address;
-  }
-  entredTitle = '';
-  content = '';
-  selectedAdresse = signal<string>('');
-  comportement = '';
-  selectedType = '';
+  selectedDestinataires = signal<string[]>([]);
   signalementPosition = {
     lat: 0,
     lng: 0,
   };
+  signalementForm = new FormGroup({
+    title: new FormControl('', [Validators.required]),
+    content: new FormControl('', [
+      Validators.required,
+      Validators.maxLength(100),
+    ]),
+    address: new FormControl('', [Validators.required]),
+    selectedType: new FormControl('', [Validators.required]),
+  });
+
+  get Alladresses() {
+    return this.mapboxService.address;
+  }
+
+  get titlesInvalid() {
+    return this.formSubmitted && this.signalementForm.controls['title'].invalid;
+  }
+  get contentIsInvalid() {
+    return (
+      this.formSubmitted && this.signalementForm.controls['content'].invalid
+    );
+  }
+  get addressIsInvalid() {
+    return (
+      this.formSubmitted && this.signalementForm.controls['address'].invalid
+    );
+  }
+  get selectedTypeIsInvalid() {
+    return (
+      this.formSubmitted &&
+      this.signalementForm.controls['selectedType'].invalid
+    );
+  }
+  get recipientTypeIsInvalid() {
+    return this.formSubmitted && this.selectedDestinataires.length === 0;
+  }
+
+  constructor() {
+    addIcons({ closeCircle, camera, send, locateOutline, pin });
+  }
 
   private formatData(data: string[]) {
     if (data.length === 1) {
@@ -128,20 +176,24 @@ export class SignalerComponent {
   }
 
   DestinatairesSelectionChanged(categories: string[]) {
-    this.selectedDestinataires = categories;
-    this.destinatairesSelections = this.formatData(this.selectedDestinataires)!;
+    this.selectedDestinataires.set(categories);
+    this.destinatairesSelections = this.formatData(
+      this.selectedDestinataires()
+    )!;
+    console.log('categorie choisi par moi', this.selectedDestinataires());
     this.modal.dismiss();
   }
 
   async addPhoto() {
     await this.photoService.addNewToGallery();
   }
+
   removePhoto(index: number) {
     this.photoService.removePhoto(index);
   }
 
   async getCurrentLocation() {
-    this.selectedAdresse.update((prev) => '');
+    this.signalementForm.controls['address'].setValue('');
     const position = await this.locationService.getCurrentPosition();
 
     if (position) {
@@ -154,7 +206,7 @@ export class SignalerComponent {
         .subscribe({
           next: (response) => {
             const placeName = response.features[0]?.place_name;
-            this.selectedAdresse.update((prev) => placeName);
+            this.signalementForm.controls['address'].setValue(placeName);
           },
           error: (err) => {
             console.error("Erreur lors de la récupération de l'adresse:", err);
@@ -188,26 +240,32 @@ export class SignalerComponent {
   }
 
   onSelect(address: string) {
-    this.selectedAdresse.update((prev) => address);
+    this.signalementForm.controls['address'].setValue(address);
     this.mapboxService.address = [];
   }
 
   async onFormSubmit() {
+    this.formSubmitted = true;
+    if (this.signalementForm.invalid) {
+      return;
+    }
+
+    console.log(this.selectedDestinataires());
+
     const newSignalement: Signalemenent = {
       id: '',
-      title: this.entredTitle,
-      location: this.selectedAdresse(),
+      title: this.signalementForm.value.title!,
+      location: this.signalementForm.value.address!,
       date: new Date().toISOString(),
       images: this.photoService.photos
         .map((photo) => photo.webviewPath)
-        .filter((path): path is string => path !== undefined), // Utilisez les URLs des photos téléchargées
-      content: this.content,
+        .filter((path): path is string => path !== undefined),
+      content: this.signalementForm.value.content!,
       coordinates: this.signalementPosition,
-      category: this.selectedType,
-      recipient: this.selectedDestinataires,
+      category: this.signalementForm.value.selectedType!,
+      recipient: this.selectedDestinataires(),
       status: 'En cours',
       resolutionComment: '',
-
       confirmedByUsers: [],
       userId: this.signalementsService.userId(),
     };
@@ -220,9 +278,8 @@ export class SignalerComponent {
       console.error("Erreur lors de l'ajout du signalement:", error);
     }
 
-    this.form?.nativeElement.reset();
-    this.selectedDestinataires = [];
-    this.selectedType = '';
+    this.signalementForm.reset();
+    this.selectedDestinataires.set([]);
     this.destinatairesSelections = 'aucun';
     this.photoService.photos = [];
   }

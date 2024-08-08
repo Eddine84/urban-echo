@@ -69,17 +69,18 @@ export class SignalementsService {
     }
   }
 
-  async deleteSignalement(id: string, destinataire: string): Promise<void> {
+  async deleteSignalement(id: string, destinataire: string[]): Promise<void> {
     const signalementDocRef = doc(this.firestore, `signalements/${id}`);
     const signalementSnapshot = await getDoc(signalementDocRef);
 
     if (signalementSnapshot.exists()) {
       const signalementData = signalementSnapshot.data() as Signalemenent;
-      console.log(destinataire);
-      console.log(signalementData);
+
       if (
         signalementData.id === id &&
-        signalementData.recipient.includes(destinataire)
+        signalementData.recipient.some((element) =>
+          destinataire.includes(element)
+        )
       ) {
         await deleteDoc(signalementDocRef);
         console.log('Document successfully deleted!');
@@ -95,7 +96,7 @@ export class SignalementsService {
   //je dois creer un login et recuperer l'id de destinarie compte et chequer sur la liste que le signaleur a pusher pour pourvoir verifier si c'est le bon pour autoriser le update
   async updateSignalementStatus(
     selectedSignalementId: string,
-    destinataire: string
+    destinataire: string[]
   ) {
     const signalementDocRef = doc(
       this.firestore,
@@ -104,10 +105,14 @@ export class SignalementsService {
     const signalementSnapshot = await getDoc(signalementDocRef);
     if (signalementSnapshot.exists()) {
       const signalementData = signalementSnapshot.data() as Signalemenent;
-
+      console.log('attention this is sginalement :', signalementData.id);
+      console.log('attention this is selected!! :', selectedSignalementId);
+      console.log('attention ce ci est destinataire :', destinataire);
       if (
         signalementData.id === selectedSignalementId &&
-        signalementData.recipient.includes(destinataire)
+        signalementData.recipient.some((element) =>
+          destinataire.includes(element)
+        )
       ) {
         signalementData.status = 'Résolu';
         await setDoc(signalementDocRef, signalementData);

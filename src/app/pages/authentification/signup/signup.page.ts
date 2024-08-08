@@ -82,18 +82,12 @@ export class SignupPage implements OnInit {
     setInterval(() => {
       this.progress += 0.01;
 
-      // Reset the progress bar when it reaches 100%
-      // to continuously show the demo
       if (this.progress > 1) {
         setTimeout(() => {
           this.progress = 0;
         }, 1000);
       }
     }, 50);
-
-    // this.destroyRef.onDestroy(() => {
-    //   clearInterval(intervalId);
-    // });
   }
 
   get emailIsInvalid() {

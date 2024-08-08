@@ -23,3 +23,28 @@ ion-img {
   cursor: pointer;
   height: 30px;
 }
+
+.error-message {
+  color: red;
+  font-size: 0.9rem;
+  margin-top: 10px;
+  text-align: center;
+  opacity: 0; /* Masquer par défaut */
+  animation: fadeIn 0.5s ease-in-out forwards; /* Animation simple pour l'apparition */
+}
+
+/* Afficher le message d'erreur avec animation */
+.error-message .show {
+  opacity: 1;
+  animation: fadeIn 0.5s ease-in-out forwards; /* Animation simple pour l'apparition */
+}
+
+/* Définir l'animation fadeIn */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

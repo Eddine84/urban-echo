@@ -84,7 +84,6 @@ export class SignalementComponent implements OnInit {
   error = signal('');
   showConfimBtn = signal(true);
   userId = this.signalementsService.userId();
-  destinataire = 'police_municipale';
 
   signalement = computed(() => this.singleSignalement());
 
@@ -104,7 +103,7 @@ export class SignalementComponent implements OnInit {
     try {
       await this.signalementsService.deleteSignalement(
         this.selectedSignalementId()!,
-        this.destinataire
+        this.signalement()?.recipient!
       );
       this.router.navigate(['/signalements/liste']);
     } catch (error) {
@@ -121,7 +120,7 @@ export class SignalementComponent implements OnInit {
     try {
       await this.signalementsService.updateSignalementStatus(
         this.selectedSignalementId()!,
-        this.destinataire
+        this.signalement()?.recipient!
       );
       this.toastService.presentToast(
         'top',
