@@ -214,6 +214,7 @@ export class SignalerComponent {
         .getAdresseFromCoords(position.latitude, position.longitude)
         .subscribe({
           next: (response) => {
+            console.log('hey djamel this is response', response);
             const placeName = response.features[0]?.place_name;
             this.signalementForm.controls['address'].setValue(placeName);
           },

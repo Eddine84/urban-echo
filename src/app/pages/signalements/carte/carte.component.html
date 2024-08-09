@@ -1,20 +1,15 @@
-<ion-accordion-group>
-  <ion-accordion value="first">
-    <ion-item slot="header" color="light">
-      <ion-label>First Accordion</ion-label>
-    </ion-item>
-    <div class="ion-padding" slot="content">First Content</div>
-  </ion-accordion>
-  <ion-accordion value="second">
-    <ion-item slot="header" color="light">
-      <ion-label>Second Accordion</ion-label>
-    </ion-item>
-    <div class="ion-padding" slot="content">Second Content</div>
-  </ion-accordion>
-  <ion-accordion value="third">
-    <ion-item slot="header" color="light">
-      <ion-label>Third Accordion</ion-label>
-    </ion-item>
-    <div class="ion-padding" slot="content">Third Content</div>
-  </ion-accordion>
-</ion-accordion-group>
+<ion-item style="padding-top: 4rem">
+  <ion-select
+    aria-label="Recherches"
+    interface="action-sheet"
+    placeholder="Filtrer les signalements"
+    (ionChange)="onChangeSignalementsFilter(filter.value)"
+    #filter
+  >
+    <ion-select-option value="all">Tous</ion-select-option>
+    <ion-select-option value="inProgress">Statut: En cours</ion-select-option>
+    <ion-select-option value="resolved">Statut: Résolus</ion-select-option>
+  </ion-select>
+</ion-item>
+
+<div id="map"></div>
