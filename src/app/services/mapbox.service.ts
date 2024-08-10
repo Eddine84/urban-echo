@@ -24,7 +24,7 @@ export class MapboxService {
   public address: string[] = [];
 
   private mapboxToken =
-    'pk.eyJ1IjoiZHpmdWxsc3RhY2tkZXYiLCJhIjoiY2x2eWJkejkzMjVodTJrbnlvaGs2c2Y0ZyJ9.IVAMRDDapDnAT7KWCYk4mA';
+    'pk.eyJ1IjoiZHpmdWxsc3RhY2tkZXYiLCJhIjoiY2x6b21oYmtxMHlpbjJrcXdxZzQ3ZW9meSJ9.tLI1_4tHGZbLMdLtyopXdw';
 
   private http = inject(HttpClient);
 

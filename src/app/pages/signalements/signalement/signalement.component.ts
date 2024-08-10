@@ -14,6 +14,8 @@ import { type Signalemenent } from '../signalement.model';
 import { RouterLink } from '@angular/router';
 import { Router } from '@angular/router';
 import { addIcons } from 'ionicons';
+import { Location } from '@angular/common';
+
 import {
   closeCircle,
   camera,
@@ -84,6 +86,7 @@ export class SignalementComponent implements OnInit {
   error = signal('');
   showConfimBtn = signal(true);
   userId = this.signalementsService.userId();
+  private location = inject(Location);
 
   signalement = computed(() => this.singleSignalement());
 
@@ -189,5 +192,17 @@ export class SignalementComponent implements OnInit {
     this.destroyRef.onDestroy(() => {
       signalementSubsciption.unsubscribe();
     });
+  }
+  goBack() {
+    // Obtenir l'URL précédente
+    const previousUrl = document.referrer;
+
+    // Si l'utilisateur vient de 'http://localhost:4200/signalements/carte'
+    if (previousUrl.includes('signalements/carte')) {
+      window.location.href = 'http://localhost:4200/signalements/carte';
+    } else {
+      // Sinon, revenir en arrière dans l'historique de navigation
+      this.location.back();
+    }
   }
 }

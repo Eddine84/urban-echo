@@ -119,10 +119,10 @@ export class SignalerComponent {
   categories: Categorie[] = categories;
   destinatairesSelections = 'aucun';
   selectedDestinataires = signal<string[]>([]);
-  signalementPosition = {
+  signalementPosition = signal({
     lat: 0,
     lng: 0,
-  };
+  });
   signalementForm = new FormGroup({
     title: new FormControl('', [Validators.required]),
     content: new FormControl('', [
@@ -206,16 +206,18 @@ export class SignalerComponent {
     const position = await this.locationService.getCurrentPosition();
 
     if (position) {
-      this.signalementPosition.lat = position.latitude;
-      this.signalementPosition.lng = position.longitude;
-      console.log('user position is', position);
+      console.log('this is my position : ', position);
+      this.signalementPosition.set({
+        lat: position.latitude,
+        lng: position.longitude,
+      });
 
       const addressSubscription = this.mapboxService
         .getAdresseFromCoords(position.latitude, position.longitude)
         .subscribe({
           next: (response) => {
-            console.log('hey djamel this is response', response);
             const placeName = response.features[0]?.place_name;
+            console.log(placeName, 'as place name');
             this.signalementForm.controls['address'].setValue(placeName);
           },
           error: (err) => {
@@ -229,7 +231,7 @@ export class SignalerComponent {
     }
   }
 
-  search(event: any) {
+  async search(event: any) {
     const searchTerm = event.target.value.toLowerCase();
     if (searchTerm && searchTerm.length > 0) {
       const mapboxSubscription = this.mapboxService
@@ -249,18 +251,25 @@ export class SignalerComponent {
     }
   }
 
-  onSelect(address: string) {
+  async onSelect(address: string) {
     this.signalementForm.controls['address'].setValue(address);
-    this.mapboxService.address = [];
+    const position = await this.locationService.getCurrentPosition();
+    if (position) {
+      console.log('this is my position : ', position);
+      this.signalementPosition.set({
+        lat: position.latitude,
+        lng: position.longitude,
+      });
+      this.mapboxService.address = [];
+    }
   }
 
   async onFormSubmit() {
+    console.log('my position after submit', this.signalementPosition());
     this.formSubmitted = true;
     if (this.signalementForm.invalid) {
       return;
     }
-
-    console.log(this.selectedDestinataires());
 
     const newSignalement: Signalemenent = {
       id: '',
@@ -272,7 +281,7 @@ export class SignalerComponent {
       //   .map((photo) => photo.webviewPath)
       //   .filter((path): path is string => path !== undefined),
       content: this.signalementForm.value.content!,
-      coordinates: this.signalementPosition,
+      coordinates: this.signalementPosition(),
       category: this.signalementForm.value.selectedType!,
       recipient: this.selectedDestinataires(),
       status: 'En cours',
@@ -280,7 +289,7 @@ export class SignalerComponent {
       confirmedByUsers: [],
       userId: this.signalementsService.userId(),
     };
-
+    console.log('this is my signalement location', newSignalement);
     try {
       await this.signalementsService.addSignalement(newSignalement);
       console.log('Signalement ajouté avec succès');
