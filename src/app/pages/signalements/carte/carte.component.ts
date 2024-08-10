@@ -5,6 +5,7 @@ import {
   inject,
   signal,
   computed,
+  Provider,
 } from '@angular/core';
 import {
   IonAccordionGroup,
@@ -15,11 +16,23 @@ import {
   IonSelectOption,
   IonSelect,
   IonHeader,
+  IonButton,
+  IonModal,
+  IonCard,
+  IonCardSubtitle,
+  IonCardTitle,
+  IonCardContent,
+  IonCardHeader,
 } from '@ionic/angular/standalone';
+import { ModalController } from '@ionic/angular';
+import { Router } from '@angular/router';
 import mapboxgl from 'mapbox-gl';
 import { LocationService } from 'src/app/services/location.service';
 import { SignalementsService } from 'src/app/services/signalements.service';
 import { Signalemenent } from '../signalement.model';
+import { DatePipe } from '@angular/common';
+import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-carte',
@@ -27,6 +40,13 @@ import { Signalemenent } from '../signalement.model';
   styleUrls: ['./carte.component.scss'],
   standalone: true,
   imports: [
+    IonCardHeader,
+    IonCardContent,
+    IonCardTitle,
+    IonCardSubtitle,
+    IonCard,
+    IonModal,
+    IonButton,
     IonHeader,
     IonContent,
     IonLabel,
@@ -35,39 +55,52 @@ import { Signalemenent } from '../signalement.model';
     IonAccordionGroup,
     IonSelectOption,
     IonSelect,
+    DatePipe,
+    RouterLink,
   ],
+  providers: [ModalController],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class CarteComponent implements OnInit, AfterViewInit {
   locationService = inject(LocationService);
   signalementsService = inject(SignalementsService);
   selectedFilter = signal('all');
-
+  selectedSignalement = signal<Signalemenent | null>(null); // Pour stocker le signalement sélectionné
+  private modalController = inject(ModalController);
+  private router = inject(Router);
   allSignalements = this.signalementsService.signalementsSignal;
   map!: mapboxgl.Map;
 
-  // Ajouter une propriété pour stocker les marqueurs
   markers: mapboxgl.Marker[] = [];
 
-  // Filtrer les signalements en fonction du statut
   filteredSignalements = computed(() => {
     const filter = this.selectedFilter();
     const signalements = this.allSignalements() || [];
+    const position = this.map?.getCenter();
 
-    console.log('Filtre sélectionné:', filter);
-    console.log('Tous les signalements:', signalements);
+    if (!position) return [];
 
-    switch (filter) {
-      case 'inProgress':
-        return signalements.filter(
-          (signalement: Signalemenent) => signalement.status === 'En cours'
-        );
-      case 'resolved':
-        return signalements.filter(
-          (signalement: Signalemenent) => signalement.status === 'Résolu'
-        );
-      default:
-        return signalements;
-    }
+    const filteredByStatus = signalements.filter((signalement) => {
+      if (filter === 'inProgress') {
+        return signalement.status === 'En cours';
+      } else if (filter === 'resolved') {
+        return signalement.status === 'Résolu';
+      }
+      return true;
+    });
+
+    return filteredByStatus.filter((signalement) => {
+      if (!signalement.coordinates) return false;
+
+      const distance = this.locationService.calculateDistance(
+        position.lat,
+        position.lng,
+        signalement.coordinates.lat,
+        signalement.coordinates.lng
+      );
+
+      return distance <= 30;
+    });
   });
 
   async ngAfterViewInit() {
@@ -85,7 +118,6 @@ export class CarteComponent implements OnInit, AfterViewInit {
       });
 
       this.map.on('load', () => {
-        // Ajouter un cercle pour la position de l'utilisateur
         this.map.addSource('user-location', {
           type: 'geojson',
           data: {
@@ -120,7 +152,6 @@ export class CarteComponent implements OnInit, AfterViewInit {
 
         this.signalementsService.loadSignalements().subscribe({
           next: (signalements: Signalemenent[]) => {
-            console.log('Signalements chargés:', signalements);
             this.signalementsService.signalementsSignal.set(signalements);
             this.displaySignalements();
           },
@@ -140,17 +171,14 @@ export class CarteComponent implements OnInit, AfterViewInit {
   }
 
   onChangeSignalementsFilter(filter: string) {
-    console.log('Changement de filtre:', filter);
     this.selectedFilter.set(filter);
     this.displaySignalements();
   }
 
   displaySignalements() {
-    // Supprimez les anciens marqueurs
     this.clearMarkers();
 
     const filtered = this.filteredSignalements();
-    console.log('Signalements filtrés:', filtered);
 
     filtered.forEach((signalement: Signalemenent) => {
       if (signalement.coordinates) {
@@ -158,18 +186,34 @@ export class CarteComponent implements OnInit, AfterViewInit {
           .setLngLat([signalement.coordinates.lng, signalement.coordinates.lat])
           .addTo(this.map);
 
-        // Ajoutez chaque marqueur à la liste des marqueurs
+        // Ajouter un événement de clic pour chaque marqueur
+        marker.getElement().addEventListener('click', () => {
+          this.selectedSignalement.set(signalement); // Stocker le signalement sélectionné
+          const modalTrigger = document.getElementById('open-modal');
+          if (modalTrigger) {
+            modalTrigger.click(); // Déclencher le bouton pour ouvrir le modal
+          }
+        });
+
         this.markers.push(marker);
       }
     });
   }
 
   clearMarkers() {
-    console.log('Nettoyage des anciens marqueurs');
-    // Supprimer chaque marqueur de la carte
     this.markers.forEach((marker) => marker.remove());
-    // Réinitialiser le tableau des marqueurs
     this.markers = [];
+  }
+
+  async closeAndRedirect() {
+    // Fermer le modal
+    await this.modalController.dismiss();
+
+    // Rediriger vers la page du signalement sélectionné
+    const selectedId = this.selectedSignalement()?.id;
+    if (selectedId) {
+      this.router.navigate(['/signalements/', selectedId]);
+    }
   }
 
   ngOnInit(): void {}

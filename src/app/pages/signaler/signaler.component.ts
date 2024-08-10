@@ -158,7 +158,7 @@ export class SignalerComponent {
     );
   }
   get recipientTypeIsInvalid() {
-    return this.formSubmitted && this.selectedDestinataires.length === 0;
+    return this.formSubmitted && this.selectedDestinataires().length < 1;
   }
 
   constructor() {

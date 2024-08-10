@@ -13,3 +13,40 @@
 </ion-item>
 
 <div id="map"></div>
+
+<ion-content class="ion-padding">
+  <ion-button id="open-modal" style="display: none"></ion-button>
+
+  <ion-modal
+    trigger="open-modal"
+    [initialBreakpoint]="0.6"
+    [breakpoints]="[0, 0.6]"
+    (click)="closeAndRedirect()"
+  >
+    <ng-template>
+      <ion-card style="padding-top: 4rem">
+        <swiper-container [loop]="true" [pagination]="true">
+          @for(image of selectedSignalement()?.images; track image){
+          <swiper-slide style="overflow: hidden; height: 200px">
+            <img
+              [alt]="selectedSignalement()?.title"
+              [src]="image"
+              style="height: 100%; width: 100%; object-fit: cover"
+            />
+          </swiper-slide>
+          }
+        </swiper-container>
+        <ion-card-header>
+          <ion-card-title>{{ selectedSignalement()?.title }}</ion-card-title>
+          <ion-card-subtitle>{{
+            selectedSignalement()?.date | date : "full"
+          }}</ion-card-subtitle>
+        </ion-card-header>
+
+        <ion-card-content>
+          {{ selectedSignalement()?.content }}
+        </ion-card-content>
+      </ion-card>
+    </ng-template>
+  </ion-modal>
+</ion-content>
