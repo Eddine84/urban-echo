@@ -19,6 +19,7 @@ import {
 import mapboxgl from 'mapbox-gl';
 import { LocationService } from 'src/app/services/location.service';
 import { SignalementsService } from 'src/app/services/signalements.service';
+import { Signalemenent } from '../signalement.model';
 
 @Component({
   selector: 'app-carte',
@@ -44,21 +45,25 @@ export class CarteComponent implements OnInit, AfterViewInit {
   allSignalements = this.signalementsService.signalementsSignal;
   map!: mapboxgl.Map;
 
+  // Ajouter une propriété pour stocker les marqueurs
+  markers: mapboxgl.Marker[] = [];
+
   // Filtrer les signalements en fonction du statut
   filteredSignalements = computed(() => {
     const filter = this.selectedFilter();
     const signalements = this.allSignalements() || [];
 
-    console.log('Filtrage des signalements avec le filtre:', filter);
+    console.log('Filtre sélectionné:', filter);
+    console.log('Tous les signalements:', signalements);
 
     switch (filter) {
       case 'inProgress':
         return signalements.filter(
-          (signalement) => signalement.status === 'En cours'
+          (signalement: Signalemenent) => signalement.status === 'En cours'
         );
       case 'resolved':
         return signalements.filter(
-          (signalement) => signalement.status === 'Résolu'
+          (signalement: Signalemenent) => signalement.status === 'Résolu'
         );
       default:
         return signalements;
@@ -114,11 +119,12 @@ export class CarteComponent implements OnInit, AfterViewInit {
         });
 
         this.signalementsService.loadSignalements().subscribe({
-          next: (signalements) => {
+          next: (signalements: Signalemenent[]) => {
+            console.log('Signalements chargés:', signalements);
             this.signalementsService.signalementsSignal.set(signalements);
-            this.displaySignalements(this.filteredSignalements());
+            this.displaySignalements();
           },
-          error: (err) => {
+          error: (err: any) => {
             console.error('Erreur lors du chargement des signalements:', err);
           },
         });
@@ -134,26 +140,36 @@ export class CarteComponent implements OnInit, AfterViewInit {
   }
 
   onChangeSignalementsFilter(filter: string) {
+    console.log('Changement de filtre:', filter);
     this.selectedFilter.set(filter);
-    this.displaySignalements(this.filteredSignalements());
+    this.displaySignalements();
   }
 
-  displaySignalements(signalements: any[]) {
+  displaySignalements() {
     // Supprimez les anciens marqueurs
     this.clearMarkers();
 
-    signalements.forEach((signalement) => {
+    const filtered = this.filteredSignalements();
+    console.log('Signalements filtrés:', filtered);
+
+    filtered.forEach((signalement: Signalemenent) => {
       if (signalement.coordinates) {
         const marker = new mapboxgl.Marker({ color: '#0000ff' })
           .setLngLat([signalement.coordinates.lng, signalement.coordinates.lat])
           .addTo(this.map);
+
+        // Ajoutez chaque marqueur à la liste des marqueurs
+        this.markers.push(marker);
       }
     });
   }
 
   clearMarkers() {
-    // Logique pour supprimer les anciens marqueurs
-    // Vous pouvez stocker les marqueurs dans un tableau et les supprimer ici
+    console.log('Nettoyage des anciens marqueurs');
+    // Supprimer chaque marqueur de la carte
+    this.markers.forEach((marker) => marker.remove());
+    // Réinitialiser le tableau des marqueurs
+    this.markers = [];
   }
 
   ngOnInit(): void {}
