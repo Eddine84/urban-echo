@@ -43,7 +43,7 @@ export class SignalementsService {
     const signalementsCollection = collection(this.firestore, 'signalements');
     const newDocRef = doc(signalementsCollection);
     signalement.id = newDocRef.id;
-    // signalement.confirmedByUsers = [signalement.id];
+
     return setDoc(newDocRef, signalement);
   }
 

@@ -20,6 +20,7 @@ import { PhotoService } from 'src/app/services/photo.service';
 import { CommonModule } from '@angular/common';
 import { LocationService } from 'src/app/services/location.service';
 import { Router } from '@angular/router';
+import { LoadingController } from '@ionic/angular';
 
 import {
   IonInput,
@@ -60,6 +61,7 @@ import {
 import { MapboxService } from 'src/app/services/mapbox.service';
 import { SignalementsService } from 'src/app/services/signalements.service';
 import { Signalemenent } from '../signalements/signalement.model';
+import { ToastService } from 'src/app/services/toast.service';
 
 export function atLeastOneRecipientSelected(
   control: AbstractControl
@@ -113,6 +115,8 @@ export class SignalerComponent {
   public locationService = inject(LocationService);
   public mapboxService = inject(MapboxService);
   private destroyRef = inject(DestroyRef);
+  private loadingController = inject(LoadingController);
+  private toasService = inject(ToastService);
   formSubmitted = false;
   @ViewChild('modal', { static: true }) modal!: IonModal;
   @ViewChild('form') form?: ElementRef<HTMLFormElement>;
@@ -189,7 +193,16 @@ export class SignalerComponent {
   }
 
   async addPhoto() {
+    // Affiche le spinner de chargement
+    const loading = await this.presentLoading();
+
+    // Attendez que la photo soit ajoutée à la galerie
     await this.photoService.addNewToGallery();
+
+    // Masquez le spinner de chargement une fois le chargement terminé
+    await loading.dismiss();
+
+    // Ajoutez le chemin de la photo au formulaire
     const photoControl = new FormControl(
       this.photoService.photos[this.photoService.photos.length - 1].webviewPath,
       Validators.required
@@ -292,10 +305,15 @@ export class SignalerComponent {
     console.log('this is my signalement location', newSignalement);
     try {
       await this.signalementsService.addSignalement(newSignalement);
+      this.toasService.presentToast('top', 'Signalement ajouté avec succès');
       console.log('Signalement ajouté avec succès');
       this.router.navigate(['/signalements/liste']);
     } catch (error) {
       console.error("Erreur lors de l'ajout du signalement:", error);
+      this.toasService.presentToast(
+        'top',
+        "Erreur lors de l'ajout du signalement"
+      );
     }
 
     this.signalementForm.reset();
@@ -305,5 +323,13 @@ export class SignalerComponent {
   }
   get photosAreInvalid() {
     return this.formSubmitted && this.photos.controls.length === 0;
+  }
+
+  async presentLoading() {
+    const loading = await this.loadingController.create({
+      message: 'Chargement...',
+    });
+    await loading.present();
+    return loading;
   }
 }
