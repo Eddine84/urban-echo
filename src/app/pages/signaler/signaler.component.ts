@@ -220,7 +220,7 @@ export class SignalerComponent {
         "Erreur lors de l'ajout de la photo"
       );
     } finally {
-      await loading.dismiss();
+      await loading.dismiss(); // Assurez-vous que le loading est toujours arrêté
     }
   }
 

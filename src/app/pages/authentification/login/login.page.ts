@@ -140,6 +140,10 @@ export class LoginPage implements OnInit {
       this.loginForm.controls.password.invalid
     );
   }
+
+  get notProvidedCred() {
+    return this.loginForm.invalid && this.formSubmitted;
+  }
   async onSubmit() {
     if (this.loginForm.invalid) {
       this.formSubmitted = true;
@@ -164,7 +168,7 @@ export class LoginPage implements OnInit {
 
       console.log('User logged in successfully:', user);
 
-      await this.signalementsService.loadSignalements();
+      this.signalementsService.loadSignalements();
 
       this.router.navigate(['/signalements/liste']);
     } catch (error: any) {

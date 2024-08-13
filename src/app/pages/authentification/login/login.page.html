@@ -36,6 +36,10 @@
         contenir au moin un charactere special ou un emajuscule</label
       >
     </div>
+    } @if(notProvidedCred) {
+    <div class="error-message">
+      <label class="show"> veuillez fournir l'email et mot de pass</label>
+    </div>
     }
 
     <ion-button type="submit" expand="block">login</ion-button>
