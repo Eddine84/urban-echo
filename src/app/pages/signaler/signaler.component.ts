@@ -195,15 +195,33 @@ export class SignalerComponent {
   async addPhoto() {
     const loading = await this.presentLoading();
 
-    await this.photoService.addNewToGallery();
+    try {
+      const photo = await this.photoService.addNewToGallery();
 
-    await loading.dismiss();
-
-    const photoControl = new FormControl(
-      this.photoService.photos[this.photoService.photos.length - 1].webviewPath,
-      Validators.required
-    );
-    this.photos.push(photoControl);
+      if (photo) {
+        const photoControl = new FormControl(
+          photo.webviewPath,
+          Validators.required
+        );
+        this.photos.push(photoControl);
+      } else {
+        console.log(
+          "L'utilisateur a refusé l'accès à la caméra ou une erreur s'est produite"
+        );
+        this.toasService.presentToast(
+          'top',
+          "L'accès à la caméra a été refusé ou une erreur s'est produite"
+        );
+      }
+    } catch (error) {
+      console.error("Erreur lors de l'ajout de la photo :", error);
+      this.toasService.presentToast(
+        'top',
+        "Erreur lors de l'ajout de la photo"
+      );
+    } finally {
+      await loading.dismiss();
+    }
   }
 
   removePhoto(index: number) {
