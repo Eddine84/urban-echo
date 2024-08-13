@@ -84,8 +84,6 @@ export class LoginPage implements OnInit {
     setInterval(() => {
       this.progress += 0.01;
 
-      // Reset the progress bar when it reaches 100%
-      // to continuously show the demo
       if (this.progress > 1) {
         setTimeout(() => {
           this.progress = 0;
@@ -159,7 +157,6 @@ export class LoginPage implements OnInit {
       );
 
       if (!user) {
-        // Si l'utilisateur n'est pas trouvé, affiche un message d'erreur
         throw new Error(
           'Erreur lors de la connexion, veuillez vérifier vos identifiants.'
         );
@@ -167,10 +164,8 @@ export class LoginPage implements OnInit {
 
       console.log('User logged in successfully:', user);
 
-      // Force the service to load signalements after login
       await this.signalementsService.loadSignalements();
 
-      // Redirection après chargement des signalements
       this.router.navigate(['/signalements/liste']);
     } catch (error: any) {
       console.error('Login failed:', error.message);

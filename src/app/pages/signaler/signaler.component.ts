@@ -15,7 +15,7 @@ import {
   AbstractControl,
   FormArray,
 } from '@angular/forms';
-import { categories } from './dummy_categories';
+import { categories } from './liste_categories_destinataires';
 import { PhotoService } from 'src/app/services/photo.service';
 import { CommonModule } from '@angular/common';
 import { LocationService } from 'src/app/services/location.service';
@@ -193,16 +193,12 @@ export class SignalerComponent {
   }
 
   async addPhoto() {
-    // Affiche le spinner de chargement
     const loading = await this.presentLoading();
 
-    // Attendez que la photo soit ajoutée à la galerie
     await this.photoService.addNewToGallery();
 
-    // Masquez le spinner de chargement une fois le chargement terminé
     await loading.dismiss();
 
-    // Ajoutez le chemin de la photo au formulaire
     const photoControl = new FormControl(
       this.photoService.photos[this.photoService.photos.length - 1].webviewPath,
       Validators.required
@@ -290,9 +286,7 @@ export class SignalerComponent {
       location: this.signalementForm.value.address!,
       date: new Date().toISOString(),
       images: this.signalementForm.value.photos!,
-      // images: this.photoService.photos
-      //   .map((photo) => photo.webviewPath)
-      //   .filter((path): path is string => path !== undefined),
+
       content: this.signalementForm.value.content!,
       coordinates: this.signalementPosition(),
       category: this.signalementForm.value.selectedType!,

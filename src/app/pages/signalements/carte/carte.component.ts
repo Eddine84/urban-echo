@@ -182,19 +182,61 @@ export class CarteComponent implements OnInit, AfterViewInit {
     this.clearMarkers();
 
     const filtered = this.filteredSignalements();
-
     filtered.forEach((signalement: Signalemenent) => {
       if (signalement.coordinates) {
-        const marker = new mapboxgl.Marker({ color: '#0000ff' })
+        // Create a custom marker element
+        const el = document.createElement('div');
+        el.className = 'custom-marker';
+
+        // Create a container for the marker image and label
+        const markerContainer = document.createElement('div');
+        markerContainer.style.display = 'flex';
+        markerContainer.style.flexDirection = 'column';
+        markerContainer.style.alignItems = 'center'; // Center the image and label horizontally
+        markerContainer.style.marginTop = '10px'; // Add some margin at the top if needed
+
+        // Add an image or icon
+        const img = document.createElement('img');
+        img.src = signalement.images[0]; // Replace with the path to your image/icon
+        img.style.width = '40px'; // Set the width of the image
+        img.style.height = '40px'; // Set the height of the image
+        img.style.borderRadius = '50%'; // Make the image circular
+        img.style.objectFit = 'cover'; // Ensure the image is properly cropped
+        markerContainer.appendChild(img);
+
+        // Add a title or label
+        const label = document.createElement('div');
+        label.innerText = signalement.title || 'Signalement'; // Use the signalement's title
+
+        // Apply advanced styling to the label
+        label.style.textAlign = 'center'; // Center the text
+        label.style.marginTop = '8px'; // Add margin to create space between the image and the label
+        label.style.padding = '5px 10px'; // Add padding inside the label
+        label.style.backgroundColor = '#007BFF'; // Set a background color (Bootstrap primary blue)
+        label.style.color = '#FFFFFF'; // Set the text color to white
+        label.style.borderRadius = '8px'; // Round the corners
+        label.style.boxShadow = '0px 4px 6px rgba(0, 0, 0, 0.1)'; // Add a subtle shadow for depth
+        label.style.fontSize = '14px'; // Adjust the font size
+        label.style.fontWeight = 'bold'; // Make the text bold
+        label.style.display = 'inline-block'; // Ensures the label is just as wide as its content
+
+        // Add the label to the markerContainer
+        markerContainer.appendChild(label);
+
+        // Append the markerContainer to the marker element
+        el.appendChild(markerContainer);
+
+        // Create a new marker using the custom element
+        const marker = new mapboxgl.Marker({ element: el })
           .setLngLat([signalement.coordinates.lng, signalement.coordinates.lat])
           .addTo(this.map);
 
-        // Ajouter un événement de clic pour chaque marqueur
+        // Add a click event listener to the marker
         marker.getElement().addEventListener('click', () => {
-          this.selectedSignalement.set(signalement); // Stocker le signalement sélectionné
+          this.selectedSignalement.set(signalement); // Store the selected signalement
           const modalTrigger = document.getElementById('open-modal');
           if (modalTrigger) {
-            modalTrigger.click(); // Déclencher le bouton pour ouvrir le modal
+            modalTrigger.click(); // Trigger the button to open the modal
           }
         });
 

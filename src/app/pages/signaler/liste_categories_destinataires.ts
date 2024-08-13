@@ -257,4 +257,14 @@ export const categories = [
     uniqueCode: 'CH-FP-025',
     created: false,
   },
+  {
+    id: 26,
+    text: 'signaleur benevole',
+    value: 'signaleur_privee',
+    description: 'signaleurs benevoles engagée autours de chez sois',
+    contactEmail: '',
+    phoneNumber: '',
+    uniqueCode: 'CH-00-000',
+    created: false,
+  },
 ];

@@ -21,7 +21,7 @@
           id="present-alert"
         >
           @for(categorie of availableCategories() ; track categorie.id){
-          <ion-select-option [value]="categorie.value"
+          <ion-select-option [value]="categorie.text"
             >{{categorie.text}}</ion-select-option
           >
           }
@@ -65,7 +65,7 @@
       </label>
     </div>
     }
-    <ion-button type="submit">register</ion-button>
+    <ion-button type="submit" expand="block">register</ion-button>
     <div class="forgotPassword">
       <a routerLink="/auth/password-reset" style="color: #ffc33f"
         >forgot password?

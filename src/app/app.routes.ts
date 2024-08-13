@@ -6,6 +6,7 @@ import { AuthentificationComponent } from './pages/authentification/authentifica
 import { routes as authRoutes } from './pages/authentification/auth.routes';
 import { NotFoundComponent } from './pages/not-found/not-found.component';
 import { ProfileComponent } from './pages/profile/profile.component';
+import { AuthGuard } from './auth.guard';
 export const routes: Routes = [
   {
     path: '',
@@ -29,6 +30,7 @@ export const routes: Routes = [
   {
     path: 'profile',
     component: ProfileComponent,
+    canActivate: [AuthGuard],
   },
   {
     path: '**',

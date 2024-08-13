@@ -8,7 +8,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { categories } from '../../signaler/dummy_categories';
+import { categories } from '../../signaler/liste_categories_destinataires';
 import { Categorie } from '../../signaler/categorie.model';
 import { passwordStrengthValidator } from '../validators';
 import {
@@ -181,13 +181,11 @@ export class SignupPage implements OnInit {
           text: 'OK',
           role: 'confirm',
           handler: async (data) => {
-            console.log('this is data', data);
             const choosenCategorie = categories.find(
               (item) => item.uniqueCode === data.code
             );
             if (choosenCategorie && !choosenCategorie?.created) {
               this.registerForm.controls.categorie.setValue(selectedCategorie);
-              console.log(selectedCategorie);
             } else {
               this.registerForm.controls.categorie.setValue('');
               await this.showToast(

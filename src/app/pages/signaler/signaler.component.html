@@ -1,6 +1,6 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>Ajouter Signalement</ion-title>
+    <ion-title>Ajouter un Signalement</ion-title>
   </ion-toolbar>
 </ion-header>
 
@@ -16,23 +16,7 @@
     @if(titlesInvalid) {
     <div class="error-message">
       <label class="show">
-        veuillez fournir le titre de votre signalement</label
-      >
-    </div>
-    }
-    <ion-item>
-      <ion-label position="floating">Contenu</ion-label>
-      <ion-textarea
-        placeholder="Enter text, leave the textarea, come back, and type to clear"
-        [clearOnEdit]="true"
-        formControlName="content"
-      ></ion-textarea>
-    </ion-item>
-    @if(contentIsInvalid) {
-    <div class="error-message">
-      <label class="show">
-        veuillez fournir la description de votre signalement maximum 100
-        chcacteres</label
+        Veuillez fournir le titre de votre signalement.</label
       >
     </div>
     }
@@ -78,7 +62,7 @@
           @if(addressIsInvalid) {
           <div class="error-message">
             <label class="show">
-              veuillez fournir une address du lieu de signalement</label
+              Veuillez fournir l'adresse du lieu de signalement.</label
             >
           </div>
           }
@@ -88,7 +72,7 @@
 
     <ion-item>
       <ion-select
-        placeholder="Choisir Type de Signalement"
+        placeholder="Choisir le Type de Signalement"
         formControlName="selectedType"
         name="typeSignalement"
         interface="action-sheet"
@@ -103,15 +87,12 @@
     </ion-item>
     @if(selectedTypeIsInvalid) {
     <div class="error-message">
-      <label class="show"> veuillez choisir le type de signalement</label>
+      <label class="show">Veuillez choisir le type de signalement.</label>
     </div>
     }
 
     <ion-item button="true" detail="false" id="select-destinataires">
       <ion-label>Destinataires</ion-label>
-      <!-- @for(selection of destinatairesSelections ; track selection){
-      <input type="text" [name]="selection" [formControlName]="selection" />
-      } -->
       <div slot="end" id="Destinataires" name="recipient">
         {{ destinatairesSelections }}
       </div>
@@ -132,11 +113,29 @@
     @if(recipientTypeIsInvalid ) {
     <div class="error-message">
       <label class="show">
-        veuillez choisir le destinataire du signalement</label
+        Veuillez choisir le destinataire du signalement.</label
       >
     </div>
     }
 
+    <ion-item>
+      <ion-label position="floating">Contenu</ion-label>
+      <ion-textarea
+        placeholder="Veuillez fournir la description de votre signalement (maximum 100 caractères)."
+        [clearOnEdit]="true"
+        formControlName="content"
+        autoGrow="true"
+        style="height: 300px"
+      ></ion-textarea>
+    </ion-item>
+    @if(contentIsInvalid) {
+    <div class="error-message">
+      <label class="show">
+        Veuillez fournir la description de votre signalement (maximum 100
+        caractères).</label
+      >
+    </div>
+    }
     <ion-item>
       <ion-grid>
         <ion-row>
@@ -157,7 +156,7 @@
         </ion-row>
         @if(photosAreInvalid) {
         <div class="error-message">
-          <label class="show"> veuillez fournir au moins une photo </label>
+          <label class="show">Veuillez fournir au moins une photo.</label>
         </div>
         }
       </ion-grid>

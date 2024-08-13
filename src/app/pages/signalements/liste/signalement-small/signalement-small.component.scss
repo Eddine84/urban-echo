@@ -1,7 +1,9 @@
 ion-item {
   cursor: pointer;
+  border: solid 2px transparent;
+  transition: border 0.3s ease-in-out; /* Transition pour la bordure */
 }
 
 .active {
-  border: solid 2px green;
+  border: solid 2px grey;
 }
