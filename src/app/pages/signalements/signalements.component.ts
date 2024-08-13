@@ -9,7 +9,10 @@ import {
   IonLabel,
   IonContent,
   IonRouterOutlet,
+  IonIcon,
 } from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
+import { listCircleOutline, mapOutline } from 'ionicons/icons';
 
 @Component({
   selector: 'app-signalements',
@@ -17,6 +20,7 @@ import {
   styleUrls: ['./signalements.component.scss'],
   standalone: true,
   imports: [
+    IonIcon,
     IonRouterOutlet,
     IonContent,
     IonLabel,
@@ -30,4 +34,7 @@ import {
 })
 export class SignalementsComponent implements OnInit {
   ngOnInit() {}
+  constructor() {
+    addIcons({ mapOutline, listCircleOutline });
+  }
 }

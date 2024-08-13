@@ -131,7 +131,7 @@ export class SignalerComponent {
     title: new FormControl('', [Validators.required]),
     content: new FormControl('', [
       Validators.required,
-      Validators.maxLength(100),
+      Validators.maxLength(1000),
     ]),
     address: new FormControl('', [Validators.required]),
     selectedType: new FormControl('', [Validators.required]),
@@ -274,7 +274,6 @@ export class SignalerComponent {
   }
 
   async onFormSubmit() {
-    console.log('my position after submit', this.signalementPosition());
     this.formSubmitted = true;
     if (this.signalementForm.invalid) {
       return;
@@ -299,6 +298,7 @@ export class SignalerComponent {
     console.log('this is my signalement location', newSignalement);
     try {
       await this.signalementsService.addSignalement(newSignalement);
+      await this.signalementsService.loadSignalements();
       this.toasService.presentToast('top', 'Signalement ajouté avec succès');
       console.log('Signalement ajouté avec succès');
       this.router.navigate(['/signalements/liste']);

@@ -31,8 +31,28 @@
   </div>
 </ion-card>
 } @else if(signalements().length === 0) {
-<!-- Aucun signalement à afficher -->
-<ion-card>
+
+<ion-card style="position: relative">
+  <ion-item style="position: absolute; top: 4rem; width: 100%">
+    <ion-select
+      aria-label="Recherches"
+      interface="action-sheet"
+      placeholder="Filtrer les signalements"
+      (ionChange)="onChangeSignalementsFilter(filter.value)"
+      #filter
+    >
+      <ion-select-option value="all">Tous</ion-select-option>
+      <ion-select-option value="inProgress">Statut: En cours</ion-select-option>
+      <ion-select-option value="resolved">Statut: Résolus</ion-select-option>
+      <ion-select-option value="mostConfirmed"
+        >Le plus confirmés</ion-select-option
+      >
+      <ion-select-option value="mostRecent"
+        >Les plus récentes</ion-select-option
+      >
+      <ion-select-option value="oldest">Les plus anciennes</ion-select-option>
+    </ion-select>
+  </ion-item>
   <div
     style="
       height: 100vh;
@@ -46,9 +66,9 @@
   </div>
 </ion-card>
 } @else{
-
-<app-signalement-large [signalementFenetre]="selectedSignalement()" />
-
+<ion-card style="margin-top: 5rem">
+  <app-signalement-large [signalementFenetre]="selectedSignalement()" />
+</ion-card>
 <ion-item>
   <ion-select
     aria-label="Recherches"

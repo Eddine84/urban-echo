@@ -14,7 +14,7 @@ import { addIcons } from 'ionicons';
 import { locationOutline } from 'ionicons/icons';
 import { Signalemenent } from '../../signalement.model';
 import { RouterLink } from '@angular/router';
-import { DatePipe, CommonModule } from '@angular/common';
+import { DatePipe, CommonModule, SlicePipe } from '@angular/common';
 @Component({
   selector: 'app-signalement-large',
   templateUrl: './signalement-large.component.html',
@@ -31,6 +31,7 @@ import { DatePipe, CommonModule } from '@angular/common';
     IonLabel,
     RouterLink,
     DatePipe,
+    SlicePipe,
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })

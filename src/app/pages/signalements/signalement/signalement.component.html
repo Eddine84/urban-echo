@@ -1,37 +1,13 @@
-@if(isFetching() && !error()) {
-<ion-card>
-  <div
-    style="
-      height: 100vh;
-      width: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    "
-  >
-    <h1 style="text-align: center">chargement du signalement en cours...</h1>
-  </div>
-</ion-card>
-} @if( error()) {
-<ion-card>
-  <div
-    style="
-      height: 100vh;
-      width: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    "
-  >
-    <h1 style="text-align: center">
-      une erreur s'est produite , veuillez réesayer plus tard... {{ error() }}
-    </h1>
-  </div>
-</ion-card>
-} @if(singleSignalement()){
-
+@if(singleSignalement()){
 <ion-content>
-  <ion-card style="padding-top: 3.5rem; position: relative">
+  <ion-card
+    style="
+      padding-top: 4rem;
+      position: relative;
+      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+      border-radius: 15px;
+    "
+  >
     <ion-button
       (click)="goBack()"
       routerLinkActive="router-link-active"
@@ -40,49 +16,143 @@
         height: 40px;
         position: absolute;
         top: 4rem;
-        left: 0.5rem;
-        z-index: 999;
+        left: 0rem;
+        z-index: 10000;
+        background-color: #007bff;
+        color: #fff;
+        border-radius: 8px;
+        box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.2);
       "
-      >back</ion-button
     >
+      Retour
+    </ion-button>
+
     <swiper-container [loop]="true" [pagination]="true">
       @for(image of singleSignalement()?.images; track image) {
       <swiper-slide>
         <img
           [alt]="singleSignalement()?.title"
           [src]="image"
-          style="height: 100%; width: 100%; object-fit: contain"
+          style="
+            height: 100%;
+            width: 100%;
+            object-fit: cover;
+            border-radius: 15px 15px 0 0;
+          "
         />
       </swiper-slide>
       }
     </swiper-container>
-    <ion-card-header>
-      <ion-card-title>{{ singleSignalement()?.title }}</ion-card-title>
-      <ion-card-subtitle>{{
-        singleSignalement()?.date | date : "full"
-      }}</ion-card-subtitle>
+
+    <ion-card-header style="text-align: center">
+      <ion-card-title
+        style="font-size: 1.5rem; font-weight: bold; margin-top: 10px"
+      >
+        {{ singleSignalement()?.title }}
+      </ion-card-title>
+      <ion-card-subtitle style="color: #666">
+        {{ singleSignalement()?.date | date : "full" }}
+      </ion-card-subtitle>
     </ion-card-header>
 
-    <ion-card-content>
-      <p>{{ singleSignalement()?.content }}</p>
-      <p>Lieu : {{ singleSignalement()?.location }}</p>
-      <p>Catégorie : {{ singleSignalement()?.category }}</p>
-      <p>Confirmations : {{ singleSignalement()?.confirmedByUsers?.length }}</p>
-      <p>statut : {{ singleSignalement()?.status }}</p>
-      <!-- @if(signalement?.confirmations > 0){
-      <ion-icon name="checkmark-circle-outline"></ion-icon>
-      }@else {
-      <ion-icon name="checkmark-circle-outline"></ion-icon>
-      } -->
+    <ion-card-content style="padding: 1.5rem">
+      <p style="margin-bottom: 1rem; font-size: 1rem; color: #333">
+        {{ singleSignalement()?.content }}
+      </p>
+      <p style="margin-bottom: 1rem; font-size: 1rem; color: #666">
+        <strong>Lieu :</strong> {{ singleSignalement()?.location }}
+      </p>
+      <p style="margin-bottom: 1rem; font-size: 1rem; color: #666">
+        <strong>Catégorie :</strong> {{ singleSignalement()?.category }}
+      </p>
+      <p
+        style="
+          margin-bottom: 1rem;
+          font-size: 1rem;
+          color: #666;
+          display: flex;
+          align-items: center;
+        "
+      >
+        <strong>Confirmé par :</strong>
+        {{ singleSignalement()?.confirmedByUsers?.length }} utilisateur(s)
+        <ion-icon
+          name="checkmark-done-outline"
+          style="margin-left: 0.5rem; color: #28a745"
+        ></ion-icon>
+      </p>
 
-      @if(showConfimBtn()){
-      <ion-fab-button (click)="confirmSignalement()">
+      <p style="margin-bottom: 1rem; font-size: 1rem; color: #666">
+        <strong>Statut :</strong> {{ singleSignalement()?.status }}
+      </p>
+
+      @if(showConfimBtn()) {
+      <ion-fab-button
+        (click)="confirmSignalement()"
+        style="color: #fff; box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.2)"
+      >
         <ion-icon name="add"></ion-icon>
       </ion-fab-button>
-
+      } @if(singleSignalement()?.resolutionComment) {
+      <p style="margin-top: 1rem; color: #007bff">
+        <strong>Commentaire de résolution :</strong>
+        {{ singleSignalement()?.resolutionComment }}
+      </p>
       }
 
-      <ion-button id="open-action-sheet-remove">
+      <!-- Add the map inside the card content -->
+      <ion-item lines="none">
+        <div
+          id="map"
+          style="
+            height: 100%;
+            width: 100%;
+            min-height: 300px;
+            border-radius: 15px;
+          "
+        ></div>
+      </ion-item>
+    </ion-card-content>
+
+    <div
+      style="
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        display: flex;
+        z-index: 999999;
+      "
+    >
+      @if(singleSignalement()?.status === 'En cours') {
+      <ion-button
+        id="open-action-sheet"
+        style="
+          flex: 1;
+          background-color: #ffc107;
+          color: #fefefe;
+          border-radius: 0;
+        "
+      >
+        Mettre à jour le statut du signalement
+      </ion-button>
+
+      <ion-action-sheet
+        trigger="open-action-sheet"
+        header="Actions"
+        [buttons]="actionSheetButtonsUpdate"
+      ></ion-action-sheet>
+      }
+
+      <ion-button
+        id="open-action-sheet-remove"
+        style="
+          width: auto;
+          background-color: #dc3545;
+          color: #fff;
+          border-radius: 0;
+        "
+      >
         <ion-icon name="trash-outline"></ion-icon>
       </ion-button>
 
@@ -91,23 +161,7 @@
         header="Actions"
         [buttons]="actionSheetButtonsRemove"
       ></ion-action-sheet>
-      @if(singleSignalement()?.resolutionComment) {
-      <p>
-        Commentaire de résolution : {{ singleSignalement()?.resolutionComment }}
-      </p>
-      }
-    </ion-card-content>
-    @if(singleSignalement()?.status === 'En cours'){
-
-    <ion-button id="open-action-sheet">Update signal status</ion-button>
-
-    <ion-action-sheet
-      trigger="open-action-sheet"
-      header="Actions"
-      [buttons]="actionSheetButtonsUpdate"
-    ></ion-action-sheet>
-
-    }
+    </div>
   </ion-card>
 </ion-content>
 }

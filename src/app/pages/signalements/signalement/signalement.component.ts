@@ -8,6 +8,7 @@ import {
   effect,
   signal,
   DestroyRef,
+  AfterViewInit,
 } from '@angular/core';
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { type Signalemenent } from '../signalement.model';
@@ -15,7 +16,7 @@ import { RouterLink } from '@angular/router';
 import { Router } from '@angular/router';
 import { addIcons } from 'ionicons';
 import { Location } from '@angular/common';
-
+import mapboxgl from 'mapbox-gl';
 import {
   closeCircle,
   camera,
@@ -25,6 +26,7 @@ import {
   pin,
   checkmarkCircle,
   trashOutline,
+  checkmarkDoneOutline,
 } from 'ionicons/icons';
 
 import {
@@ -41,6 +43,7 @@ import {
 import { SignalementsService } from 'src/app/services/signalements.service';
 import { CommonModule, DatePipe } from '@angular/common';
 import { ToastService } from 'src/app/services/toast.service';
+import { LocationService } from 'src/app/services/location.service';
 
 @Component({
   selector: 'app-signalement',
@@ -63,7 +66,7 @@ import { ToastService } from 'src/app/services/toast.service';
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
-export class SignalementComponent implements OnInit {
+export class SignalementComponent implements OnInit, AfterViewInit {
   constructor() {
     addIcons({
       closeCircle,
@@ -74,9 +77,11 @@ export class SignalementComponent implements OnInit {
       checkmarkCircle,
       add,
       trashOutline,
+      checkmarkDoneOutline,
     });
   }
   router = inject(Router);
+  private locationService = inject(LocationService);
   toastService = inject(ToastService);
   destroyRef = inject(DestroyRef);
   signalementsService = inject(SignalementsService);
@@ -87,6 +92,8 @@ export class SignalementComponent implements OnInit {
   showConfimBtn = signal(true);
   userId = this.signalementsService.userId();
   private location = inject(Location);
+  map!: mapboxgl.Map;
+  markers: mapboxgl.Marker[] = [];
 
   signalement = computed(() => this.singleSignalement());
 
@@ -108,6 +115,7 @@ export class SignalementComponent implements OnInit {
         this.selectedSignalementId()!,
         this.signalement()?.recipient!
       );
+      await this.signalementsService.loadSignalements();
       this.router.navigate(['/signalements/liste']);
     } catch (error) {
       this.toastService.presentToast(
@@ -203,6 +211,63 @@ export class SignalementComponent implements OnInit {
     } else {
       // Sinon, revenir en arrière dans l'historique de navigation
       this.location.back();
+    }
+  }
+
+  async ngAfterViewInit() {
+    (mapboxgl as typeof mapboxgl).accessToken =
+      'pk.eyJ1IjoiZHpmdWxsc3RhY2tkZXYiLCJhIjoiY2x2eWJkejkzMjVodTJrbnlvaGs2c2Y0ZyJ9.IVAMRDDapDnAT7KWCYk4mA';
+
+    const position = await this.locationService.getCurrentPosition();
+
+    if (position) {
+      this.map = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/mapbox/streets-v12',
+        center: [position.longitude, position.latitude],
+        zoom: 10,
+      });
+
+      this.map.on('load', async () => {
+        this.map.addSource('user-location', {
+          type: 'geojson',
+          data: {
+            type: 'Feature',
+            geometry: {
+              type: 'Point',
+              coordinates: [position.longitude, position.latitude],
+            },
+            properties: {},
+          },
+        });
+
+        this.map.addLayer({
+          id: 'user-location-circle',
+          type: 'circle',
+          source: 'user-location',
+          paint: {
+            'circle-radius': 10,
+            'circle-color': '#ff0000',
+            'circle-stroke-color': '#ffffff',
+            'circle-stroke-width': 2,
+          },
+        });
+
+        this.map.flyTo({
+          center: [position.longitude, position.latitude],
+          zoom: 14,
+          speed: 1.5,
+          curve: 1,
+          easing: (t) => t,
+        });
+      });
+    } else {
+      this.map = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/mapbox/streets-v12',
+        center: [-74.5, 40],
+        zoom: 10,
+      });
     }
   }
 }

@@ -1,7 +1,4 @@
-<ion-card
-  style="padding-top: 4rem"
-  [routerLink]="['../', signalementFenetre().id]"
->
+<ion-card [routerLink]="['../', signalementFenetre().id]">
   <swiper-container [loop]="true" [pagination]="true">
     @for(image of signalementFenetre().images; track image){
     <swiper-slide style="overflow: hidden; height: 200px">
@@ -20,7 +17,7 @@
     }}</ion-card-subtitle>
   </ion-card-header>
 
-  <ion-card-content>
-    {{ signalementFenetre().content }}
-  </ion-card-content>
+  <!-- <ion-card-content>
+    {{ signalementFenetre().content | slice : 0 : 50 }}
+  </ion-card-content> -->
 </ion-card>

@@ -125,13 +125,12 @@
         [clearOnEdit]="true"
         formControlName="content"
         autoGrow="true"
-        style="height: 300px"
       ></ion-textarea>
     </ion-item>
     @if(contentIsInvalid) {
     <div class="error-message">
       <label class="show">
-        Veuillez fournir la description de votre signalement (maximum 100
+        Veuillez fournir la description de votre signalement (maximum 1000
         caractères).</label
       >
     </div>
