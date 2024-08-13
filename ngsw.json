@@ -1,6 +1,6 @@
 {
   "configVersion": 1,
-  "timestamp": 1723579687834,
+  "timestamp": 1723580520926,
   "index": "/urban-echo/index.html",
   "assetGroups": [
     {
@@ -81,7 +81,7 @@
         "/urban-echo/9977.b1441e2758751932.js",
         "/urban-echo/common.0e75dcc93d124160.js",
         "/urban-echo/index.html",
-        "/urban-echo/main.ade043b18b8b669f.js",
+        "/urban-echo/main.fa02f27a7c6e05d6.js",
         "/urban-echo/manifest.webmanifest",
         "/urban-echo/polyfills.a945b0249cb630b5.js",
         "/urban-echo/runtime.66aa6447290572ab.js",
@@ -194,8 +194,8 @@
     "/urban-echo/assets/not-found.svg": "0cac5cc511bf1cbbf00a816db6816e577c91e1cf",
     "/urban-echo/assets/shapes.svg": "5413e95adabcb2cb639970051f55e0ddb64ace53",
     "/urban-echo/common.0e75dcc93d124160.js": "d943c2abda6b038d57c306d688197d9a9878a48a",
-    "/urban-echo/index.html": "f808cd761796329148850e344c9264ee76f6059e",
-    "/urban-echo/main.ade043b18b8b669f.js": "2d129a21bb4fdea7dcb90bee7a5122a86d70ac01",
+    "/urban-echo/index.html": "b712c450f37cd92d4bab3efae78ebc59accf1325",
+    "/urban-echo/main.fa02f27a7c6e05d6.js": "8ab61e6751c0cf1b46f2b87e0bb58095ee75bdff",
     "/urban-echo/manifest.webmanifest": "9a088b7c4339228d1082e666ce105dc889bc180c",
     "/urban-echo/polyfills.a945b0249cb630b5.js": "800750908237e114ab16371b555a0f41f3ea7da2",
     "/urban-echo/runtime.66aa6447290572ab.js": "e92346c8348e4681c92677d87a7dae74912f07fe",
