@@ -2,10 +2,11 @@
 <ion-content>
   <ion-card
     style="
-      padding-top: 4rem;
+      padding-top: 4.5rem;
       position: relative;
       box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
       border-radius: 15px;
+      padding-bottom: 3rem;
     "
   >
     <ion-button
@@ -99,9 +100,7 @@
         {{ singleSignalement()?.resolutionComment }}
       </p>
       }
-
-      <!-- Add the map inside the card content -->
-      <ion-item lines="none">
+      <ion-label>
         <div
           id="map"
           style="
@@ -111,7 +110,7 @@
             border-radius: 15px;
           "
         ></div>
-      </ion-item>
+      </ion-label>
     </ion-card-content>
 
     <div

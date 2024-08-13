@@ -220,54 +220,59 @@ export class SignalementComponent implements OnInit, AfterViewInit {
 
     const position = await this.locationService.getCurrentPosition();
 
-    if (position) {
-      this.map = new mapboxgl.Map({
-        container: 'map',
-        style: 'mapbox://styles/mapbox/streets-v12',
-        center: [position.longitude, position.latitude],
-        zoom: 10,
+    const signalementSubscription = this.signalementsService
+      .getSignalementById(this.selectedSignalementId()!)
+      .subscribe({
+        next: (data) => {
+          this.map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/streets-v12',
+            center: [data?.coordinates.lng!, data?.coordinates.lat!],
+            zoom: 10,
+          });
+
+          this.map.on('load', async () => {
+            this.map.addSource('user-location', {
+              type: 'geojson',
+              data: {
+                type: 'Feature',
+                geometry: {
+                  type: 'Point',
+                  coordinates: [data?.coordinates.lng!, data?.coordinates.lat!],
+                },
+                properties: {},
+              },
+            });
+
+            this.map.addLayer({
+              id: 'user-location-circle',
+              type: 'circle',
+              source: 'user-location',
+              paint: {
+                'circle-radius': 10,
+                'circle-color': '#ff0000',
+                'circle-stroke-color': '#ffffff',
+                'circle-stroke-width': 2,
+              },
+            });
+
+            this.map.flyTo({
+              center: [data?.coordinates.lng!, data?.coordinates.lat!],
+              zoom: 14,
+              speed: 1.5,
+              curve: 1,
+              easing: (t) => t,
+            });
+          });
+        },
+        error: (error) => {
+          console.log(error);
+          this.error.set('Erreur lors du chargement du signalement.');
+        },
       });
 
-      this.map.on('load', async () => {
-        this.map.addSource('user-location', {
-          type: 'geojson',
-          data: {
-            type: 'Feature',
-            geometry: {
-              type: 'Point',
-              coordinates: [position.longitude, position.latitude],
-            },
-            properties: {},
-          },
-        });
-
-        this.map.addLayer({
-          id: 'user-location-circle',
-          type: 'circle',
-          source: 'user-location',
-          paint: {
-            'circle-radius': 10,
-            'circle-color': '#ff0000',
-            'circle-stroke-color': '#ffffff',
-            'circle-stroke-width': 2,
-          },
-        });
-
-        this.map.flyTo({
-          center: [position.longitude, position.latitude],
-          zoom: 14,
-          speed: 1.5,
-          curve: 1,
-          easing: (t) => t,
-        });
-      });
-    } else {
-      this.map = new mapboxgl.Map({
-        container: 'map',
-        style: 'mapbox://styles/mapbox/streets-v12',
-        center: [-74.5, 40],
-        zoom: 10,
-      });
-    }
+    this.destroyRef.onDestroy(() => {
+      signalementSubscription.unsubscribe();
+    });
   }
 }
