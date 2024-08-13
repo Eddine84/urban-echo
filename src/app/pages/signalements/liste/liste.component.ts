@@ -99,30 +99,23 @@ export class ListeComponent implements OnInit {
     this.selectedFilter.set(filter);
   }
 
-  ngOnInit() {
+  async ngOnInit() {
     console.log('ngOnInit called');
 
     this.isFetching.set(true);
-    const loadSignalementsSubscription = this.signalementsService
-      .loadSignalements()
-      .subscribe({
-        next: (data) => {
-          console.log('Data loaded', data);
-          this.signalementsService.signalementsSignal.set(data);
-          this.isFetching.set(false);
-          console.log('test 2');
-          this.selectedSignalement.set(data[0]);
-        },
-        error: (error) => {
-          console.log('Error loading data', error);
-          this.error.set('erreur lors du chargement des signalement');
-          this.isFetching.set(false);
-        },
-      });
 
-    this.destroyRef.onDestroy(() => {
-      loadSignalementsSubscription.unsubscribe();
-    });
+    try {
+      const loadSignalementsSData =
+        await this.signalementsService.loadSignalements();
+
+      this.signalementsService.signalementsSignal.set(loadSignalementsSData);
+      this.isFetching.set(false);
+      this.selectedSignalement.set(loadSignalementsSData[0]);
+    } catch (error) {
+      console.log('Error loading data', error);
+      this.error.set('erreur lors du chargement des signalement');
+      this.isFetching.set(false);
+    }
   }
 
   constructor() {

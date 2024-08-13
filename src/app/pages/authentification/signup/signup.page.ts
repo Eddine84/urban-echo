@@ -37,6 +37,7 @@ import {
 import { PasswordResetPage } from '../password-reset/password-reset.page';
 import { getFirestore, setDoc, doc } from 'firebase/firestore';
 import { AuthService } from 'src/app/services/auth.service';
+import { SignalementsService } from 'src/app/services/signalements.service';
 
 @Component({
   selector: 'app-signup',
@@ -65,6 +66,8 @@ import { AuthService } from 'src/app/services/auth.service';
   ],
 })
 export class SignupPage implements OnInit {
+  private firestore = getFirestore();
+  private signalementsService = inject(SignalementsService);
   router = inject(Router);
   formSubmitted = false;
   isFetching = signal(false);
@@ -75,7 +78,6 @@ export class SignupPage implements OnInit {
   toastController = inject(ToastController);
   public progress = 0;
   destroyRef = inject(DestroyRef);
-  private firestore = getFirestore();
 
   constructor() {
     addIcons({ personOutline, lockClosedOutline, chevronForward });
@@ -141,6 +143,7 @@ export class SignupPage implements OnInit {
           categorie: this.registerForm.value.categorie,
         });
         await this.showToast('Success ! utilisateur crée !');
+        await this.signalementsService.loadSignalements();
         this.router.navigate(['/signalements/liste']);
         console.log('my response:', response);
       }

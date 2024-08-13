@@ -117,7 +117,7 @@ export class CarteComponent implements OnInit, AfterViewInit {
         zoom: 10,
       });
 
-      this.map.on('load', () => {
+      this.map.on('load', async () => {
         this.map.addSource('user-location', {
           type: 'geojson',
           data: {
@@ -150,15 +150,18 @@ export class CarteComponent implements OnInit, AfterViewInit {
           easing: (t) => t,
         });
 
-        this.signalementsService.loadSignalements().subscribe({
-          next: (signalements: Signalemenent[]) => {
-            this.signalementsService.signalementsSignal.set(signalements);
+        try {
+          const signalementsData =
+            await this.signalementsService.loadSignalements();
+          if (signalementsData) {
+            this.signalementsService.signalementsSignal.set(signalementsData);
             this.displaySignalements();
-          },
-          error: (err: any) => {
-            console.error('Erreur lors du chargement des signalements:', err);
-          },
-        });
+          } else {
+            console.log('No signalements available');
+          }
+        } catch (error) {
+          console.error('Error loading signalements:', error);
+        }
       });
     } else {
       this.map = new mapboxgl.Map({

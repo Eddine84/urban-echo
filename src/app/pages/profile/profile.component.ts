@@ -32,6 +32,7 @@ import {
   notificationsOutline,
 } from 'ionicons/icons';
 import { addIcons } from 'ionicons';
+import { SignalementsService } from 'src/app/services/signalements.service';
 
 @Component({
   selector: 'app-profile',
@@ -72,7 +73,9 @@ export class ProfileComponent implements OnInit {
       notificationsOutline,
     });
   }
-  authService = inject(AuthService);
+
+  private authService = inject(AuthService);
+  private signalementsService = inject(SignalementsService);
   router = inject(Router);
 
   userName: string = '';
@@ -93,6 +96,7 @@ export class ProfileComponent implements OnInit {
 
   async logout() {
     await this.authService.logout();
+    await this.signalementsService.loadSignalements();
     this.router.navigate(['/']);
   }
 }

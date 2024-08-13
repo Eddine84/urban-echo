@@ -44,6 +44,7 @@ import { PasswordResetPage } from '../password-reset/password-reset.page';
 import { AuthService } from 'src/app/services/auth.service';
 
 import { Observable, debounce, debounceTime, of } from 'rxjs';
+import { SignalementsService } from 'src/app/services/signalements.service';
 @Component({
   selector: 'app-login',
   templateUrl: './login.page.html',
@@ -72,6 +73,7 @@ import { Observable, debounce, debounceTime, of } from 'rxjs';
 export class LoginPage implements OnInit {
   private destroyRef = inject(DestroyRef);
   private authService = inject(AuthService);
+  private signalementsService = inject(SignalementsService);
   public progress = 0;
   formSubmitted = false;
   isFetching = signal(false);
@@ -145,33 +147,38 @@ export class LoginPage implements OnInit {
       this.formSubmitted = true;
       return;
     }
+
     this.isFetching.set(true);
     const enteredEmail = this.loginForm.value.email;
     const enteredPassword = this.loginForm.value.password;
+
     try {
       const user = await this.authService.login(
         enteredEmail!,
         enteredPassword!
       );
-      if (user) {
-        this.isFetching.set(false);
-        console.log('User logged in successfully:', user);
-        this.router.navigate(['/signalements/liste']);
-      } else {
-        this.isFetching.set(false);
-        console.error(
-          'Erreur lors de la connexion, veuillez vérifier vos identifiants.'
-        );
-        await this.showToast(
+
+      if (!user) {
+        // Si l'utilisateur n'est pas trouvé, affiche un message d'erreur
+        throw new Error(
           'Erreur lors de la connexion, veuillez vérifier vos identifiants.'
         );
       }
+
+      console.log('User logged in successfully:', user);
+
+      // Force the service to load signalements after login
+      await this.signalementsService.loadSignalements();
+
+      // Redirection après chargement des signalements
+      this.router.navigate(['/signalements/liste']);
     } catch (error: any) {
-      this.isFetching.set(false);
       console.error('Login failed:', error.message);
       await this.showToast(
         'Échec de la connexion. Veuillez réessayer plus tard.'
       );
+    } finally {
+      this.isFetching.set(false);
     }
   }
 

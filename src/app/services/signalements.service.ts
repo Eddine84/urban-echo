@@ -165,9 +165,53 @@ export class SignalementsService {
       );
     }
   }
-  loadSignalements(): Observable<Signalemenent[]> {
-    return this.fetchSignalements();
+  loadSignalements(): Promise<Signalemenent[]> {
+    return new Promise((resolve, reject) => {
+      const user = this.authService.userSignal();
+      const isAnonymous = user?.isAnonymous;
+      const signalementsCollection = collection(this.firestore, 'signalements');
+
+      if (isAnonymous) {
+        // For anonymous users, load all signalements
+        const subscription = collectionData(signalementsCollection, {
+          idField: 'id',
+        }).subscribe({
+          next: (data) => {
+            this.signalementsSignal.set(data as Signalemenent[]);
+            resolve(data as Signalemenent[]);
+            subscription.unsubscribe();
+          },
+          error: (error) => reject(error),
+        });
+      } else {
+        // For authenticated users, load signalements specific to their category
+        const usersDocRef = doc(this.firestore, 'users', user?.uid!);
+        getDoc(usersDocRef).then((userSnapshot) => {
+          if (userSnapshot.exists()) {
+            const userData = userSnapshot.data();
+            const userCategory = userData['categorie'];
+            const categoryQuery = query(
+              signalementsCollection,
+              where('recipient', 'array-contains', userCategory)
+            );
+            const subscription = collectionData(categoryQuery, {
+              idField: 'id',
+            }).subscribe({
+              next: (data) => {
+                this.signalementsSignal.set(data as Signalemenent[]);
+                resolve(data as Signalemenent[]);
+                subscription.unsubscribe();
+              },
+              error: (error) => reject(error),
+            });
+          } else {
+            reject(new Error('User data not found'));
+          }
+        });
+      }
+    });
   }
+
   getSignalementById(id: string): Observable<Signalemenent | undefined> {
     const signalementDoc = doc(this.firestore, `signalements/${id}`);
     return docData(signalementDoc, { idField: 'id' }) as Observable<
