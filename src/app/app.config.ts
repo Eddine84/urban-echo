@@ -6,9 +6,10 @@ import { provideAuth, getAuth } from '@angular/fire/auth';
 import { provideFirestore, getFirestore } from '@angular/fire/firestore';
 import { provideMessaging, getMessaging } from '@angular/fire/messaging';
 import { provideHttpClient } from '@angular/common/http';
-import { environment } from '../environments/environment'; // Ajustez le chemin selon votre structure
+import { environment } from '../environments/environment';
 import { routes } from './app.routes';
 import { isDevMode } from '@angular/core';
+
 import {
   IonicRouteStrategy,
   provideIonicAngular,
@@ -24,7 +25,7 @@ export const appConfig: ApplicationConfig = {
     }),
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
     provideIonicAngular(),
-    provideFirebaseApp(() => initializeApp(environment.firebaseConfig)), // Initialise Firebase ici
+    provideFirebaseApp(() => initializeApp(environment.firebaseConfig)),
     provideFirestore(() => getFirestore()),
     provideAuth(() => getAuth()),
     provideMessaging(() => getMessaging()),

@@ -262,6 +262,8 @@ export class SignalerComponent {
 
   async onSelect(address: string) {
     this.signalementForm.controls['address'].setValue(address);
+    this.mapboxService.address = [];
+
     const position = await this.locationService.getCurrentPosition();
     if (position) {
       console.log('this is my position : ', position);
@@ -269,7 +271,6 @@ export class SignalerComponent {
         lat: position.latitude,
         lng: position.longitude,
       });
-      this.mapboxService.address = [];
     }
   }
 

@@ -12,8 +12,8 @@ export class LocationService {
   } | null> {
     try {
       if (isPlatform('hybrid')) {
-        // Pour les appareils mobiles (iOS et Android)
         let permissions = await Geolocation.checkPermissions();
+
         if (permissions.location !== 'granted') {
           permissions = await Geolocation.requestPermissions();
         }
@@ -25,10 +25,9 @@ export class LocationService {
           };
         } else {
           console.log('Location permission not granted');
-          return null; // Retourner null si la permission n'est pas accordée
+          return null;
         }
       } else {
-        // Pour le web
         return this.getCurrentPositionWeb();
       }
     } catch (e) {

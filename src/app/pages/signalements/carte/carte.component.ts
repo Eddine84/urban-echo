@@ -5,7 +5,7 @@ import {
   inject,
   signal,
   computed,
-  Provider,
+  DestroyRef,
 } from '@angular/core';
 import {
   IonAccordionGroup,
@@ -33,6 +33,7 @@ import { Signalemenent } from '../signalement.model';
 import { DatePipe } from '@angular/common';
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop'; // For RxJS interop
 
 @Component({
   selector: 'app-carte',
@@ -68,6 +69,7 @@ export class CarteComponent implements OnInit, AfterViewInit {
   selectedSignalement = signal<Signalemenent | null>(null); // Pour stocker le signalement sélectionné
   private modalController = inject(ModalController);
   private router = inject(Router);
+  private destroyRef = inject(DestroyRef);
   allSignalements = this.signalementsService.signalementsSignal;
   map!: mapboxgl.Map;
 
@@ -150,18 +152,25 @@ export class CarteComponent implements OnInit, AfterViewInit {
           easing: (t) => t,
         });
 
-        try {
-          const signalementsData =
-            await this.signalementsService.loadSignalements();
-          if (signalementsData) {
-            this.signalementsService.signalementsSignal.set(signalementsData);
-            this.displaySignalements();
-          } else {
-            console.log('No signalements available');
-          }
-        } catch (error) {
-          console.error('Error loading signalements:', error);
-        }
+        // Souscrire à l'Observable pour charger les signalements
+        this.signalementsService
+          .loadSignalements()
+          .pipe(takeUntilDestroyed(this.destroyRef))
+          .subscribe({
+            next: (signalementsData) => {
+              if (signalementsData) {
+                this.signalementsService.signalementsSignal.set(
+                  signalementsData
+                );
+                this.displaySignalements();
+              } else {
+                console.log('No signalements available');
+              }
+            },
+            error: (error) => {
+              console.error('Error loading signalements:', error);
+            },
+          });
       });
     } else {
       this.map = new mapboxgl.Map({

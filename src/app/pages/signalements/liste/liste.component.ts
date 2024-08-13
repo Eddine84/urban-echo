@@ -27,6 +27,7 @@ import {
 } from '@ionic/angular/standalone';
 
 import { Signalemenent } from '../signalement.model';
+import { AuthService } from 'src/app/services/auth.service';
 
 @Component({
   selector: 'app-liste',
@@ -59,7 +60,8 @@ export class ListeComponent implements OnInit {
   isFetching = signal(false);
   error = signal('');
   selectedSignalement = signal<any>({});
-
+  private authService = inject(AuthService);
+  user = this.authService.userSignal;
   // Calculé les signalements en fonction du filtre sélectionné
   signalements = computed(() => {
     console.log('Calculating filtered signalements');
@@ -98,24 +100,50 @@ export class ListeComponent implements OnInit {
   onChangeSignalementsFilter(filter: string) {
     this.selectedFilter.set(filter);
   }
-
   async ngOnInit() {
-    console.log('ngOnInit called');
+    const localUser = this.authService.getUserFromLocalStorage();
+    if (!localUser) {
+      await this.fetchUser();
+    } else {
+      this.loadSignalements();
+    }
+  }
 
+  async fetchUser() {
     this.isFetching.set(true);
-
     try {
-      const loadSignalementsSData =
-        await this.signalementsService.loadSignalements();
-
-      this.signalementsService.signalementsSignal.set(loadSignalementsSData);
-      this.isFetching.set(false);
-      this.selectedSignalement.set(loadSignalementsSData[0]);
+      const userResponse = await this.authService.signInAnonymously();
+      if (userResponse) {
+        this.authService.getUserFromLocalStorage();
+        this.loadSignalements();
+      }
     } catch (error) {
-      console.log('Error loading data', error);
-      this.error.set('erreur lors du chargement des signalement');
+      console.log('Error in fetchUser', error);
+      this.error.set("Erreur lors de l'initialisation");
       this.isFetching.set(false);
     }
+  }
+
+  loadSignalements() {
+    this.signalementsService.loadSignalements().subscribe({
+      next: (loadSignalementsSData) => {
+        if (loadSignalementsSData) {
+          this.signalementsService.signalementsSignal.set(
+            loadSignalementsSData
+          );
+          this.selectedSignalement.set(loadSignalementsSData[0]);
+          this.isFetching.set(false);
+        } else {
+          console.log('cant fetch signalement...');
+          this.isFetching.set(false);
+        }
+      },
+      error: (error) => {
+        console.log('Error loading data', error);
+        this.error.set('erreur lors du chargement des signalement');
+        this.isFetching.set(false);
+      },
+    });
   }
 
   constructor() {

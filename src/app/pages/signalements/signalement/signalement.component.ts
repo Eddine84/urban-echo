@@ -5,7 +5,6 @@ import {
   Input,
   inject,
   computed,
-  effect,
   signal,
   DestroyRef,
   AfterViewInit,
@@ -44,6 +43,7 @@ import { SignalementsService } from 'src/app/services/signalements.service';
 import { CommonModule, DatePipe } from '@angular/common';
 import { ToastService } from 'src/app/services/toast.service';
 import { LocationService } from 'src/app/services/location.service';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop'; // For RxJS interop
 
 @Component({
   selector: 'app-signalement',
@@ -182,8 +182,9 @@ export class SignalementComponent implements OnInit, AfterViewInit {
 
   ngOnInit() {
     this.isFetching.set(true);
-    const signalementSubsciption = this.signalementsService
+    this.signalementsService
       .getSignalementById(this.selectedSignalementId()!)
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (data) => {
           this.singleSignalement.set(data);
@@ -197,10 +198,8 @@ export class SignalementComponent implements OnInit, AfterViewInit {
           this.error.set('chargement du signalement en cours...');
         },
       });
-    this.destroyRef.onDestroy(() => {
-      signalementSubsciption.unsubscribe();
-    });
   }
+
   goBack() {
     // Obtenir l'URL précédente
     const previousUrl = document.referrer;
@@ -220,8 +219,9 @@ export class SignalementComponent implements OnInit, AfterViewInit {
 
     const position = await this.locationService.getCurrentPosition();
 
-    const signalementSubscription = this.signalementsService
+    this.signalementsService
       .getSignalementById(this.selectedSignalementId()!)
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (data) => {
           this.map = new mapboxgl.Map({
@@ -270,9 +270,5 @@ export class SignalementComponent implements OnInit, AfterViewInit {
           this.error.set('Erreur lors du chargement du signalement.');
         },
       });
-
-    this.destroyRef.onDestroy(() => {
-      signalementSubscription.unsubscribe();
-    });
   }
 }

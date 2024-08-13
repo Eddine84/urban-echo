@@ -1,9 +1,10 @@
 import { DestroyRef, Injectable, inject, signal } from '@angular/core';
+import { Observable, from, map, switchMap } from 'rxjs';
 import {
   SignalStatus,
   type Signalemenent,
 } from '../pages/signalements/signalement.model';
-import { Observable, from, of, switchMap } from 'rxjs';
+
 import {
   Firestore,
   collection,
@@ -128,90 +129,78 @@ export class SignalementsService {
       throw new Error('No such document!');
     }
   }
-  private fetchSignalements(): Observable<Signalemenent[]> {
-    const user = this.authService.userSignal;
-    const isAnonymous = user()?.isAnonymous;
+  // private fetchSignalements(): Observable<Signalemenent[]> {
+  //   const user = this.authService.userSignal;
+  //   const isAnonymous = user()?.isAnonymous;
 
+  //   const signalementsCollection = collection(this.firestore, 'signalements');
+
+  //   if (isAnonymous) {
+  //     // Utilisateur anonyme : récupérer tous les signalements
+  //     return collectionData(signalementsCollection, {
+  //       idField: 'id',
+  //     }) as Observable<Signalemenent[]>;
+  //   } else {
+  //     // Utilisateur authentifié : récupérer les signalements spécifiques à la catégorie de l'utilisateur
+  //     const usersDocRef = doc(this.firestore, 'users', user()?.uid!);
+
+  //     return from(getDoc(usersDocRef)).pipe(
+  //       switchMap((userSnapshot) => {
+  //         if (userSnapshot.exists()) {
+  //           const userData = userSnapshot.data();
+  //           const userCategory = userData['categorie'];
+  //           console.log('userData', userData);
+  //           console.log('userCategory', userCategory);
+  //           const categoryQuery = query(
+  //             signalementsCollection,
+  //             where('recipient', 'array-contains', userCategory)
+  //           );
+  //           return collectionData(categoryQuery, {
+  //             idField: 'id',
+  //           }) as Observable<Signalemenent[]>;
+  //         } else {
+  //           console.error('Utilisateur non trouvé dans la collection users.');
+  //           return of([]);
+  //         }
+  //       })
+  //     );
+  //   }
+  // }
+
+  // Assurez-vous que le chemin est correct
+  loadSignalements(): Observable<Signalemenent[]> {
+    const user = this.authService.userSignal();
+    const isAnonymous = user?.isAnonymous;
     const signalementsCollection = collection(this.firestore, 'signalements');
 
     if (isAnonymous) {
-      // Utilisateur anonyme : récupérer tous les signalements
       return collectionData(signalementsCollection, {
         idField: 'id',
-      }) as Observable<Signalemenent[]>;
+      }).pipe(map((docs) => docs as Signalemenent[]));
     } else {
-      // Utilisateur authentifié : récupérer les signalements spécifiques à la catégorie de l'utilisateur
-      const usersDocRef = doc(this.firestore, 'users', user()?.uid!);
-
+      const usersDocRef = doc(this.firestore, 'users', user?.uid!);
       return from(getDoc(usersDocRef)).pipe(
         switchMap((userSnapshot) => {
           if (userSnapshot.exists()) {
             const userData = userSnapshot.data();
-            const userCategory = userData['categorie'];
-            console.log('userData', userData);
-            console.log('userCategory', userCategory);
+            const userCategory = userData?.['categorie'];
+            if (!userCategory) {
+              throw new Error('User category not found');
+            }
             const categoryQuery = query(
               signalementsCollection,
               where('recipient', 'array-contains', userCategory)
             );
             return collectionData(categoryQuery, {
               idField: 'id',
-            }) as Observable<Signalemenent[]>;
+            }).pipe(map((docs) => docs as Signalemenent[]));
           } else {
-            console.error('Utilisateur non trouvé dans la collection users.');
-            return of([]);
+            throw new Error('User data not found');
           }
         })
       );
     }
   }
-  loadSignalements(): Promise<Signalemenent[]> {
-    return new Promise((resolve, reject) => {
-      const user = this.authService.userSignal();
-      const isAnonymous = user?.isAnonymous;
-      const signalementsCollection = collection(this.firestore, 'signalements');
-
-      if (isAnonymous) {
-        // For anonymous users, load all signalements
-        const subscription = collectionData(signalementsCollection, {
-          idField: 'id',
-        }).subscribe({
-          next: (data) => {
-            this.signalementsSignal.set(data as Signalemenent[]);
-            resolve(data as Signalemenent[]);
-            subscription.unsubscribe();
-          },
-          error: (error) => reject(error),
-        });
-      } else {
-        // For authenticated users, load signalements specific to their category
-        const usersDocRef = doc(this.firestore, 'users', user?.uid!);
-        getDoc(usersDocRef).then((userSnapshot) => {
-          if (userSnapshot.exists()) {
-            const userData = userSnapshot.data();
-            const userCategory = userData['categorie'];
-            const categoryQuery = query(
-              signalementsCollection,
-              where('recipient', 'array-contains', userCategory)
-            );
-            const subscription = collectionData(categoryQuery, {
-              idField: 'id',
-            }).subscribe({
-              next: (data) => {
-                this.signalementsSignal.set(data as Signalemenent[]);
-                resolve(data as Signalemenent[]);
-                subscription.unsubscribe();
-              },
-              error: (error) => reject(error),
-            });
-          } else {
-            reject(new Error('User data not found'));
-          }
-        });
-      }
-    });
-  }
-
   getSignalementById(id: string): Observable<Signalemenent | undefined> {
     const signalementDoc = doc(this.firestore, `signalements/${id}`);
     return docData(signalementDoc, { idField: 'id' }) as Observable<
