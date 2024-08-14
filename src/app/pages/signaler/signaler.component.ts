@@ -21,6 +21,7 @@ import { CommonModule } from '@angular/common';
 import { LocationService } from 'src/app/services/location.service';
 import { Router } from '@angular/router';
 import { LoadingController } from '@ionic/angular';
+import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 
 import {
   IonInput,
@@ -196,6 +197,18 @@ export class SignalerComponent {
     const loading = await this.presentLoading();
 
     try {
+      // Vérification des permissions de la caméra
+      const hasPermission = await this.checkCameraPermission();
+
+      if (!hasPermission) {
+        this.toasService.presentToast(
+          'top',
+          "L'accès à la caméra a été refusé ou une erreur s'est produite"
+        );
+        return;
+      }
+
+      // Ajouter une nouvelle photo à la galerie
       const photo = await this.photoService.addNewToGallery();
 
       if (photo) {
@@ -220,7 +233,49 @@ export class SignalerComponent {
         "Erreur lors de l'ajout de la photo"
       );
     } finally {
-      await loading.dismiss(); // Assurez-vous que le loading est toujours arrêté
+      await loading.dismiss();
+    }
+  }
+
+  async checkCameraPermission() {
+    try {
+      const status = await navigator.permissions.query({
+        name: 'camera' as PermissionName,
+      });
+
+      if (status.state === 'granted') {
+        // Permission déjà accordée
+        return true;
+      } else if (status.state === 'prompt') {
+        // Permission non encore demandée, déclenchement de la demande
+        return await this.requestCameraAccess();
+      } else {
+        // Permission refusée
+        console.warn('Permission caméra refusée');
+        return false;
+      }
+    } catch (err) {
+      console.error(
+        'Erreur lors de la vérification de la permission de la caméra :',
+        err
+      );
+      return false;
+    }
+  }
+
+  async requestCameraAccess() {
+    try {
+      const photo = await Camera.getPhoto({
+        resultType: CameraResultType.Uri,
+        source: CameraSource.Camera,
+        quality: 100,
+      });
+
+      console.log('Photo capturée', photo);
+      return true;
+    } catch (err) {
+      console.error("Erreur lors de l'accès à la caméra :", err);
+      return false;
     }
   }
 

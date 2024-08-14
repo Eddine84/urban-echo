@@ -125,7 +125,7 @@ export class ListeComponent implements OnInit {
   }
 
   loadSignalements() {
-    this.signalementsService.loadSignalements().subscribe({
+    const subscribe = this.signalementsService.loadSignalements().subscribe({
       next: (loadSignalementsSData) => {
         if (loadSignalementsSData) {
           this.signalementsService.signalementsSignal.set(
@@ -143,6 +143,9 @@ export class ListeComponent implements OnInit {
         this.error.set('erreur lors du chargement des signalement');
         this.isFetching.set(false);
       },
+    });
+    this.destroyRef.onDestroy(() => {
+      subscribe.unsubscribe();
     });
   }
 
