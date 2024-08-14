@@ -143,8 +143,22 @@ export class SignupPage implements OnInit {
           categorie: this.registerForm.value.categorie,
         });
         await this.showToast('Success ! utilisateur crée !');
-        await this.signalementsService.loadSignalements();
-        this.router.navigate(['/signalements/liste']);
+        const subscribe = this.signalementsService
+          .loadSignalements()
+          .subscribe({
+            next: (data) => {
+              this.signalementsService.signalementsSignal.set(data);
+              this.router.navigate(['/signalements/liste']);
+            },
+            error: () => {
+              console.log(console.error);
+              this.router.navigate(['/signalements/liste']);
+            },
+          });
+        this,
+          this.destroyRef.onDestroy(() => {
+            subscribe.unsubscribe();
+          });
         console.log('my response:', response);
       }
     } catch (error) {

@@ -168,9 +168,20 @@ export class LoginPage implements OnInit {
 
       console.log('User logged in successfully:', user);
 
-      this.signalementsService.loadSignalements();
+      const subscribe = this.signalementsService.loadSignalements().subscribe({
+        next: (data) => {
+          this.signalementsService.signalementsSignal.set(data);
+          this.router.navigate(['/signalements/liste']);
+        },
+        error: (error) => {
+          console.error('Error loading signalements:', error);
+          this.router.navigate(['/signalements/liste']);
+        },
+      });
 
-      this.router.navigate(['/signalements/liste']);
+      this.destroyRef.onDestroy(() => {
+        subscribe.unsubscribe();
+      });
     } catch (error: any) {
       console.error('Login failed:', error.message);
       await this.showToast(

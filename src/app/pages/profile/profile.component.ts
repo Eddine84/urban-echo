@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, DestroyRef } from '@angular/core';
 import { AuthService } from 'src/app/services/auth.service';
 import { Router } from '@angular/router';
 import {
@@ -77,7 +77,7 @@ export class ProfileComponent implements OnInit {
   private authService = inject(AuthService);
   private signalementsService = inject(SignalementsService);
   router = inject(Router);
-
+  destroyRef = inject(DestroyRef);
   userName: string = '';
   userEmail: string = '';
   userCategory: string = '';
@@ -96,7 +96,19 @@ export class ProfileComponent implements OnInit {
 
   async logout() {
     await this.authService.logout();
-    await this.signalementsService.loadSignalements();
-    this.router.navigate(['/']);
+    const subscribe = this.signalementsService.loadSignalements().subscribe({
+      next: (data) => {
+        this.signalementsService.signalementsSignal.set(data);
+        this.router.navigate(['/signalements/liste']);
+      },
+      error: () => {
+        console.log(console.error);
+        this.router.navigate(['/signalements/liste']);
+      },
+    });
+    this,
+      this.destroyRef.onDestroy(() => {
+        subscribe.unsubscribe();
+      });
   }
 }
